@@ -1,0 +1,4 @@
+This article is about the artificial immune system in industrial application. Basing on cutting parameters (force, vibrations, torque etc.) they try to detect tool brake using a negative-selection algorithm. [Dasgupta, D., & Forrest, S._*Artificial immune systems in industrial applications. Proceedings of the Second International Conference on Intelligent Processing and Manufacturing of Materials*](https://scihub.bban.top/10.1109/ipmm.1999.792486)  
+
+This article is about the artificial immune system in industrial application. Authors compare AIS with Social Learning Mechanisms to few others AIS which use cloning alghoritm. Basing on proportional–/integral–/derivative-time they try to tune a PID.
+[Mingan Wang, Shuo Feng *An Artificial Immune System Algorithm with Social Learning and Its Application in Industrial PID Controller Design*](http://downloads.hindawi.com/journals/mpe/2017/3959474.pdf)

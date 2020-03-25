@@ -1,0 +1,12 @@
+# Ignore extra latex files
+PROJEKT z DL_IO.pdf
+raport-blx.bib
+raport.aux
+raport.bbl
+raport.bcf
+raport.blg
+raport.log
+raport.out
+raport.run.xml
+raport.toc
+
