@@ -4,7 +4,10 @@
 [model](Model.md)
 
 ## Literature overview
-[Literature overview](lit_ov.md)
+[Literature overview](LiteratureOverview.md)
+
+## UML model
+[Uml model](UML.md)
 
 ## Final raport
 [Raport](final_raport/raport.pdf)
