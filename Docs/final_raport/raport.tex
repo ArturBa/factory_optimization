@@ -41,87 +41,84 @@
 \caption{Factory scheme}
 \end{figure}
 
-\subsubsection{Factory main goal function:}\label{factory-main-goal-function}
+\subsubsection{Funkcja celu fabryki:}
 
 $$Income = \sum^{n_p}_{i=1}(p_i*(v_i-m_i*m_p)) - (1+b_i)*\sum^{n_w}_{i = 1}(w_i*s_i *t_{wi}) - m_r*m_p - punish$$
 
-Where:
+Gdzie:
 \begin{itemize}
-    \item $n_p$ -- number of item types ( param )
-    \item $p_i (n_m)$ -- number of manufactured i-type items
-    \item $v_i(v_{bi}, t_{wi},t_{bi},w_q)$ -- value of the i-type items
-    \item $m_i$ -- number of material needed to manufacture the i-type item ( param )
-    \item $m_p$ -- material price ( param )
-    \item $n_w$ -- number of types of employees ( param )\item$w_i$ -- number of i-type employees (param)
-    \item $s_i$ -- the salary of i-type employees\item$b$ -- the bonus for employees (param)
-    \item $t_{wi}$ -- real working time of the i-type machine/employee for one product
-    \item $m_r(p_i,n_m)$ -- material remains, unused material
-    \item $p_{i_{min}}$ -- minimum number of i-type items that must be manufactured to avoid punishment (param) 
-    \item $p_{i_{max}}$ -- maximum number of items that can be manufactured 
-    \item $n_m$ -- number of materials in the warehouse at the beginning of the day (param)
-    \item $punish(p_{un}, p_{num_i}, v_i)$ -- punishment for not produced required item number
+    \item $n_p$ -- ilość rodzajów części
+    \item $p_i (n_m)$ -- ilość wyprodukowanych części i-tego typu
+    \item $v_i(v_{bi}, t_{wi},t_{bi},w_q)$ -- wartość części i-tego typu
+    \item $m_i$ -- liczba surowca potrzebna do wytworzenia elementu i-tego typu
+    \item $m_p$ -- cena surowca
+    \item $n_w$ -- liczba rodzajów pracowników
+    \item $w_i$ -- liczba pracowników i-tego rodzaju
+    \item $s_i$ -- wypłata pracownika i-tego rodzaju
+    \item $b$ -- premia pracownicza
+    \item $m_r(p_i,n_m)$ -- pozostały materiał
+    \item $p_{i_{min}}$ -- minimalna ilość elementów do wytworzenia i uniknięcia kary
+    \item $p_{i_{max}}$ -- maksymalna ilość wytworzonych elementów
+    \item $n_m$ -- liczba surowca na początek dnia
 \end{itemize}
-\subsubsection{Punish}
+\subsubsection{Kara}
 $punish = p_{un}*\sum^{n_p}_{i=1}(p_{num_i})*v_i$
 
 $p_{num_i}= \left\{\begin{matrix} 0  \;\quad\quad\quad\quad  \textrm{if} \quad  p_{i_{min}}-p_i \leq  0    \\ p_{i_{min}}-p_i  \quad  \textrm{if} \quad  p_{i_{min}}-p_i >  0  \end{matrix}\right.$
 
 Where: 
 \begin{itemize}
-    \item $p_{un}$ -- punishment rate 
-    \item $p_{num_i}(p_{i_{min}}, p_i)$ -- number of i-type items for which a punishment will be charged
+    \item $p_{un}$ -- współczynnik kary
+    \item $p_{num_i}(p_{i_{min}}, p_i)$ -- liczba elementów i-tego typu dla których naliczana jest kara
 \end{itemize}
-\subsubsection{Number of types}
+\subsubsection{Liczba pracowników}
 
-Number of types of employees and machines should be the same:
+Liczba pracowników i-tego typu jest równa ilości maszyn i-tego typu:
 
 $n_p = n_w$
 
-\subsubsection{Max number of items}\label{max-number-of-items}
+\subsubsection{Maksymalna ilość elementów}\label{max-number-of-items}
 
-Numbers of i-type items must meet:
+Niezbędna ilość elementów i-tego typu:
 
 $\sum^{n_p}_{i=1} p_{i_{max}} * m_i< n_m$
 
-\subsubsection{Real working time of the i-type machine/employee for one
-product}\label{real-working-time-of-the-i-type-machineemployee-for-one-product}
+\subsubsection{Rzeczywisty czas pracy maszyny na 1 produkt}\label{real-working-time-of-the-i-type-machineemployee-for-one-product} $t_{wi} = t_{pi} + p_i * t_{bi}$
 
-$t_{wi} = t_{pi} + p_i * t_{bi}$
-
-\subsection{Model assumption}\label{model-assumption}
+\subsection{Parametry modelu}\label{model-assumption}
 
 \begin{longtable}[c]{lll}
-Parameter & mark & value\\ \hline
-Material number & $n_m$ & [$x$ - 100]\\
-Material cost & $m_p$ & 15\\
-Working time & ? & {[}1 - 16{]}\\
-Minimal number of big parts & $p_{0_{min}}$ & [0 - 10]\\
-Minimal number of small parts & $p_{1_{min}}$ & [0 -10]\\
-Big machine worker salary & $s_0$ & 70\\
-Big machine material requirements & $m_0$ & 4\\
-Big machine preparation time & $t_{p0}$ & 30 min\\
-Base big machine item value & $v_{b0}$ & 50\\
-Base big machine working time per item & $t_{b0}$ & 1h\\
-Number of big machines & ? & [0 - 10]\\
-Small machine worker salary & $s_1$ & 60\\
-Small machine material requirements & $m_1$ & 3\\
-Small machine preparation time & $t_{p1}$ & 45 min\\
-Base small machine item value & $v_{b1}$ & 35\\
-Base small machine working time per item & $t_{b1}$ & 45 min\\
-Number of small machines & ? & [0 - 10]\\
-Max working time per worker & ? & 8h\\
-Worker bonus & b & [0.0 - 0.2]\\
-Punishment rate & $p_{un}$ & 1.5
+Parametr & oznaczenie & wartość\\ \hline
+Ilość surowców & $n_m$ & [$x$ - 100]\\
+Koszt surowca & $m_p$ & 15\\
+Czas pracy & ? & {[}1 - 16{]}\\
+Minimalna ilość dużych części & $p_{0_{min}}$ & [0 - 10]\\
+Minimalna ilość małych części & $p_{1_{min}}$ & [0 -10]\\
+Wypłata operatora dużej maszyny & $s_0$ & 70\\
+Wymagana ilość materiału na duży element & $m_0$ & 4\\
+Czas przygotowania dużej maszyny & $t_{p0}$ & 30 min\\
+Wartość dużego elementu & $v_{b0}$ & 50\\
+Podstawowy czas pracy na duży element & $t_{b0}$ & 1h\\
+Liczba dużych maszyn & ? & [0 - 10]\\
+Wypłata operatora małej maszyny & $s_1$ & 60\\
+Ilość surowca na mały element & $m_1$ & 3\\
+Czas przygotowania małej maszyny & $t_{p1}$ & 45 min\\
+Wartość małego elementu & $v_{b1}$ & 35\\
+Czas wytworzenia małego elementu & $t_{b1}$ & 45 min\\
+Ilość małych maszyn & ? & [0 - 10]\\
+Maksymalny czas pracy pracownika & ? & 8h\\
+Bonus pracowniczy & b & [0.0 - 0.2]\\
+Współczynnik kary & $p_{un}$ & 1.5
 \end{longtable}
 
-Where:
+Gdzie:
 \begin{itemize}
-    \item $x$ -- number of required parts * cost of part
-    \item Input parameters are given in square brackets
-    \item Worker is hired on full time. Must work 8h
-    \item First and second shift are equal in machine and worker count and type
-    \item We reserve materials for a require items
-    \item Any item manufactured over require number is a profit 
+    \item $x$ -- ilość wymaganych elementów * koszt części 
+    \item Parametry wejściowe podane są w kwadratowych nawiasach
+    \item Pracownik jest zatrudniony na pełen etat (8h płacone z góry)
+    \item Pierwsza i druga zmiana są identyczne w ilość i rodzaj maszyn i pracowników
+    \item Rezerwujemy surowce na wymagane elementy
+    \item Wszystkie elementy ponad wymaganą liczbę są eksta dochodem
 \end{itemize}
 
 
@@ -158,3 +155,4 @@ This article is about using Clonal Selection Algorithm in determining optimal op
 \printbibliography
 
 \end{document}
+
