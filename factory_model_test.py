@@ -6,8 +6,8 @@ from factoryclasses import BigMachine
 
 factory = Factory(170, 3)
 factory.add_machines(3, 4)
-factory.big_machine.set_spec(1, 2, 40, 4, 5)
-factory.small_machine.set_spec(1, 1, 35, 3, 5)
+factory.big_machine.set_spec(prep_time= 1, runtime= 2, product_value= 40, mat_required= 4, base_salary= 5)
+factory.small_machine.set_spec(prep_time= 1, runtime= 1, product_value= 35, mat_required= 3, base_salary= 5)
 factory.set_time(4)  #hours
 factory.set_requirements(20,14,2,2)
 factory.set_worker_bonus(0)  #[0-1]

@@ -10,15 +10,13 @@ class Machine:
         self._machine_count = 0
         self.base_salary = 0
 
-    def set_spec(self, prep_time, runtime, product_value, mat_required, base_salary):
+    def set_spec(self, *, prep_time, runtime, product_value, mat_required, base_salary):
         self.prep_time = prep_time
         self.runtime = runtime
         self.product_value = product_value
         self.mat_required = mat_required
         self.base_salary = base_salary
 
-    # def add(self, machine_count):
-    #     self.machine_count = machine_count
     @property
     def machine_count(self):
         return self._machine_count
