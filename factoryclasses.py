@@ -7,9 +7,8 @@ class Machine:
         self.runtime = 0
         self.product_value = 0
         self.mat_required = 0
-        self.machine_count = 0
+        self._machine_count = 0
         self.base_salary = 0
-        self.machine_count = 0
 
     def set_spec(self, prep_time, runtime, product_value, mat_required, base_salary):
         self.prep_time = prep_time
@@ -20,7 +19,12 @@ class Machine:
 
     # def add(self, machine_count):
     #     self.machine_count = machine_count
-
+    @property
+    def machine_count(self):
+        return self._machine_count
+    @machine_count.setter
+    def machine_count(self, machine_count):
+        self._machine_count = machine_count
 
 
 class SmallMachine(Machine):
@@ -75,8 +79,8 @@ class Factory:
         self.time = time
 
     def add_machines(self, big_machine_count, small_machine_count):
-        self.big_machine.add(big_machine_count)
-        self.small_machine.add(small_machine_count)
+        self.big_machine.machine_count = big_machine_count
+        self.small_machine.machine_count = small_machine_count
 
     def set_worker_bonus(self, bonus):
         self.worker_bonus = bonus
