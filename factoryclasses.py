@@ -94,7 +94,7 @@ class Factory:
     def set_haste(self, haste):
         self.haste = haste
 
-    def set_requirements(self, req_big, req_small, big_punish, small_punish):
+    def set_requirements(self, *, req_big, req_small, big_punish, small_punish):
         self.req_big_parts = req_big
         self.req_small_parts = req_small
         self.big_punish_rate = big_punish
