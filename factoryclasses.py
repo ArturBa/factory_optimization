@@ -57,7 +57,7 @@ class Factory:
         self.big_punish_rate = 0
         self.big_machine = BigMachine()
         self.small_machine = SmallMachine()
-        self.time = 0
+        self._time = 0
         self.worker_bonus = 0
         self.haste = 0
 
@@ -73,8 +73,12 @@ class Factory:
                 f'Required big parts = {self.req_big_parts}\n' +
                 f'Required small parts = {self.req_small_parts}\n')
 
-    def set_time(self, time):
-        self.time = time
+    @property
+    def time(self):
+        return self._time
+    @time.setter
+    def time(self, time):
+        self._time = time
 
     def add_machines(self, big_machine_count, small_machine_count):
         self.big_machine.machine_count = big_machine_count
