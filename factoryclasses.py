@@ -58,7 +58,7 @@ class Factory:
         self.big_machine = BigMachine()
         self.small_machine = SmallMachine()
         self._time = 0
-        self.worker_bonus = 0
+        self._worker_bonus = 0
         self.haste = 0
 
     def __str__(self):
@@ -84,8 +84,12 @@ class Factory:
         self.big_machine.machine_count = big_machine_count
         self.small_machine.machine_count = small_machine_count
 
-    def set_worker_bonus(self, bonus):
-        self.worker_bonus = bonus
+    @property
+    def worker_bonus(self):
+        return self._worker_bonus
+    @time.setter
+    def worker_bonus(self, bonus):
+        self._worker_bonus = bonus
 
     def set_haste(self, haste):
         self.haste = haste
@@ -259,6 +263,7 @@ class Factory:
         if self.req_small_parts - small_parts > 0:
             punish += (self.req_small_parts - small_parts) * self.small_punish_rate
 
+<<<<<<< HEAD
         # values and salary
         big_parts_value = big_parts * self.big_machine.product_value * (1 + self.worker_bonus) * (1 - 2 * self.haste)
         big_machine_salary = shifts * self.big_machine.machine_count * self.big_machine.base_salary * (
