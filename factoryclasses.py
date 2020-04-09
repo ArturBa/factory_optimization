@@ -80,7 +80,7 @@ class Factory:
     def time(self, time):
         self._time = time
 
-    def add_machines(self, big_machine_count, small_machine_count):
+    def add_machines(self, *, big_machine_count, small_machine_count):
         self.big_machine.machine_count = big_machine_count
         self.small_machine.machine_count = small_machine_count
 
@@ -97,9 +97,6 @@ class Factory:
     @haste.setter
     def haste(self, haste):
         self._haste = haste
-
-    # def set_haste(self, haste):
-    #     self.haste = haste
 
     def set_requirements(self, *, req_big, req_small, big_punish, small_punish):
         self.req_big_parts = req_big
