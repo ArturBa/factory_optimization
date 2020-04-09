@@ -59,7 +59,7 @@ class Factory:
         self.small_machine = SmallMachine()
         self._time = 0
         self._worker_bonus = 0
-        self.haste = 0
+        self._haste = 0
 
     def __str__(self):
         return ('Factory specifications:\n' +
@@ -91,8 +91,15 @@ class Factory:
     def worker_bonus(self, bonus):
         self._worker_bonus = bonus
 
-    def set_haste(self, haste):
-        self.haste = haste
+    @property
+    def haste(self):
+        return self._haste
+    @haste.setter
+    def haste(self, haste):
+        self._haste = haste
+
+    # def set_haste(self, haste):
+    #     self.haste = haste
 
     def set_requirements(self, *, req_big, req_small, big_punish, small_punish):
         self.req_big_parts = req_big
