@@ -18,8 +18,9 @@ class Machine:
         self.mat_required = mat_required
         self.base_salary = base_salary
 
-    def add(self, machine_count):
-        self.machine_count = machine_count
+    # def add(self, machine_count):
+    #     self.machine_count = machine_count
+
 
 
 class SmallMachine(Machine):
