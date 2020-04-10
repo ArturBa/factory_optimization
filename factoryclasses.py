@@ -57,7 +57,6 @@ class BigMachine(Machine):
                 f'Machine count = {self.machine_count}\n' +
                 f'Base salary = {self.base_salary}\n')
 
-
 class Factory:
     def __init__(self, *, material, material_cost):
         self.material = material
