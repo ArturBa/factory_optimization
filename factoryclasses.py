@@ -174,6 +174,7 @@ class Factory:
             small_first_run = True
             big_first_run = True
 
+
             # calculate spare parts quantity
             while spare_material >= self.big_machine.mat_required or spare_material >= self.small_machine.mat_required:
                 # small finished first
