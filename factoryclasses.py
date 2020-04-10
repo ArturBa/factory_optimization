@@ -1,7 +1,7 @@
 from math import ceil
+from abc import ABC, abstractmethod
 
-
-class Machine:
+class Machine(ABC):
     def __init__(self):
         self.prep_time = 0
         self.runtime = 0
@@ -10,6 +10,7 @@ class Machine:
         self._machine_count = 0
         self.base_salary = 0
 
+    @abstractmethod
     def set_spec(self, *, prep_time, runtime, product_value, mat_required, base_salary):
         self.prep_time = prep_time
         self.runtime = runtime
@@ -17,7 +18,7 @@ class Machine:
         self.mat_required = mat_required
         self.base_salary = base_salary
 
-    @property
+    @property # machine_count getter/setter
     def machine_count(self):
         return self._machine_count
     @machine_count.setter
@@ -26,6 +27,12 @@ class Machine:
 
 
 class SmallMachine(Machine):
+    def __init__(self):
+        super().__init__()
+
+    def set_spec(self, *, prep_time, runtime, product_value, mat_required, base_salary):
+        super().set_spec(prep_time= prep_time, runtime= runtime, product_value= product_value, mat_required= mat_required, base_salary= base_salary)
+
     def __str__(self):
         return ('Small machine specifications:\n' +
                 f'Preparation time = {self.prep_time}\n' +
@@ -35,8 +42,13 @@ class SmallMachine(Machine):
                 f'Machine count = {self.machine_count}\n' +
                 f'Base salary = {self.base_salary}\n')
 
-
 class BigMachine(Machine):
+    def __init__(self):
+            super().__init__()
+        
+    def set_spec(self, *, prep_time, runtime, product_value, mat_required, base_salary):
+        super().set_spec(prep_time= prep_time, runtime= runtime, product_value= product_value, mat_required= mat_required, base_salary= base_salary)
+
     def __str__(self):
         return ('Big machine specifications:\n' +
                 f'Preparation time = {self.prep_time}\n' +
@@ -48,7 +60,7 @@ class BigMachine(Machine):
 
 
 class Factory:
-    def __init__(self, material, material_cost):
+    def __init__(self, *, material, material_cost):
         self.material = material
         self.material_cost = material_cost
         self.req_small_parts = 0
@@ -73,7 +85,7 @@ class Factory:
                 f'Required big parts = {self.req_big_parts}\n' +
                 f'Required small parts = {self.req_small_parts}\n')
 
-    @property
+    @property # time getter/setter
     def time(self):
         return self._time
     @time.setter
@@ -84,14 +96,14 @@ class Factory:
         self.big_machine.machine_count = big_machine_count
         self.small_machine.machine_count = small_machine_count
 
-    @property
+    @property # bonus getter/setter
     def worker_bonus(self):
         return self._worker_bonus
     @time.setter
     def worker_bonus(self, bonus):
         self._worker_bonus = bonus
 
-    @property
+    @property # haste getter/setter
     def haste(self):
         return self._haste
     @haste.setter
@@ -267,7 +279,6 @@ class Factory:
         if self.req_small_parts - small_parts > 0:
             punish += (self.req_small_parts - small_parts) * self.small_punish_rate
 
-<<<<<<< HEAD
         # values and salary
         big_parts_value = big_parts * self.big_machine.product_value * (1 + self.worker_bonus) * (1 - 2 * self.haste)
         big_machine_salary = shifts * self.big_machine.machine_count * self.big_machine.base_salary * (

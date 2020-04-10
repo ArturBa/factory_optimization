@@ -1,10 +1,9 @@
 from factoryclasses import Factory
-from factoryclasses import Machine
 from factoryclasses import SmallMachine
 from factoryclasses import BigMachine
 
 
-factory = Factory(170, 3)
+factory = Factory(material= 170, material_cost= 3)
 factory.add_machines(big_machine_count= 3, small_machine_count= 4)
 factory.big_machine.set_spec(prep_time= 1, runtime= 2, product_value= 40, mat_required= 4, base_salary= 5)
 factory.small_machine.set_spec(prep_time= 1, runtime= 1, product_value= 35, mat_required= 3, base_salary= 5)
