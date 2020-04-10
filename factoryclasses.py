@@ -25,7 +25,6 @@ class Machine(ABC):
     def machine_count(self, machine_count):
         self._machine_count = machine_count
 
-
 class SmallMachine(Machine):
     def __init__(self):
         super().__init__()
