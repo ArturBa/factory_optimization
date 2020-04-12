@@ -1,5 +1,17 @@
 from math import ceil
 from abc import ABC, abstractmethod
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
+
+file_handler = logging.FileHandler('factoryclasses.log')
+file_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+
 
 def calc_max_parts(machine):
     return machine.working_time // machine.real_runtime * machine.machine_count
@@ -175,14 +187,14 @@ class Factory:
             self.big_machine.worker_bonus = bonus
             self.small_machine.worker_bonus = bonus
         else:
-            print('Workers\' bonus not changed. Enter bonus value from 0 to 0.5')
+            logger.debug('Workers\' bonus not changed. Enter bonus value from 0 to 0.5')
 
     def set_haste(self, haste):
         if haste >= 0 and haste <= 0.5:
             self.big_machine.haste = haste
             self.small_machine.haste = haste
         else:
-            print('Haste not changed. Enter haste value from 0 to 0.5')
+            logger.debug('Haste not changed. Enter haste value from 0 to 0.5')
 
     def set_requirements(self,*, req_big, req_small, big_punish, small_punish):
         self.big_machine.parts_required = req_big
@@ -208,15 +220,15 @@ class Factory:
 
         # created parts quantity:
         # 1. enough material for full work
-        print('1')
         if (calc_max_parts(self.big_machine) * self.big_machine.mat_required + calc_max_parts(self.small_machine) *
                 self.small_machine.mat_required <= self.material):
+            logger.info('1')
             self.big_machine.created_parts = calc_max_parts(self.big_machine)
             self.small_machine.created_parts = calc_max_parts(self.small_machine)
 
         # 2. not enough material for full work but enough for requirements
         elif (spare_material>=0):
-            print('2')
+            logger.info('2')
             # required parts:
             ## time spent
             self.small_machine.elapsed_time = calc_time_for_req(self.big_machine)
@@ -256,11 +268,11 @@ class Factory:
 
 
         # 3. not enough material for requirements
-        elif (spare_material<0):
-            print('Impossible requirements. Add more material or set lower requirements.')
+        elif (spare_material < 0):
+            logger.debug('Impossible requirements. Add more material or set lower requirements.')
             return
         else:
-            print('Unexpected outcome.')
+            logger.debug('Unexpected outcome.')
             return
 
         #calculate profit
@@ -282,5 +294,5 @@ class Factory:
                 1 + self.worker_bonus)
 
         profit = big_parts_value + small_parts_value - big_machine_salary - small_machine_salary - material_cost - punish
-        print(f'Daily profit = {profit} \n')
+        logger.info(f'Daily profit = {profit} \n')
         return profit
