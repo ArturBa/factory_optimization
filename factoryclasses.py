@@ -1,62 +1,146 @@
 from math import ceil
+from abc import ABC, abstractmethod
+
+def calc_max_parts(machine):
+    return machine.working_time // machine.real_runtime * machine.machine_count
+
+def calc_time_for_req(machine):
+    # done on 2 shifts
+    if machine.prep_time + ceil( machine.parts_required / machine.machine_count) * machine.real_runtime > 8:
+        return 2 * self.big_machine.prep_time + ceil( machine.parts_required / machine.machine_count) * machine.real_runtime
+    # done on 1 shift
+    else:
+        return machine.prep_time + ceil(machine.parts_required / machine.machine_count) * machine.real_runtime
+
+def first_cycle(machine, spare_material):
+    # enough material
+    if spare_material >= machine.mat_required * (machine.machine_count - machine.parts_required % machine.machine_count):
+        used_material = machine.mat_required * (machine.machine_count - machine.parts_required % machine.machine_count)
+        created_parts = (machine.machine_count - machine.parts_required % machine.machine_count)
+        return created_parts, used_material
+    # not enough material
+    else:
+        used_material = machine.mat_required * (spare_material // machine.mat_required)
+        created_parts = spare_material // machine.mat_required
+        return created_parts, used_material
+
+def regular_cycle(machine, spare_material):
+    # not enough material for all machines
+    if spare_material // machine.mat_required < machine.machine_count:
+        created_parts = spare_material // machine.mat_required
+        used_material = (spare_material // machine.mat_required) * machine.mat_required
+        # workers' shift change
+        if machine.elapsed_time < 8 and machine.elapsed_time + machine.real_runtime > 8:
+            elapsed_time = machine.real_runtime + machine.prep_time
+        else:
+            elapsed_time = machine.real_runtime
+        return  created_parts, used_material, elapsed_time
+    # enough material for all machines
+    else:
+        created_parts = machine.machine_count
+        used_material = machine.machine_count * machine.mat_required
+        # Workers' shift change
+        if machine.elapsed_time < 8 and machine.elapsed_time + machine.real_runtime > 8:
+            elapsed_time = machine.real_runtime + machine.prep_time
+        else:
+            elapsed_time = machine.real_runtime
+        return created_parts, used_material, elapsed_time
 
 
-class Machine:
+class Machine(ABC):
     def __init__(self):
         self.prep_time = 0
         self.runtime = 0
-        self.product_value = 0
+        self.base_product_value = 0
         self.mat_required = 0
-        self.machine_count = 0
+        self.parts_required = 0
+        self._machine_count = 0
         self.base_salary = 0
         self.machine_count = 0
+        self.created_parts = 0
+        self.elapsed_time = 0
+        self.haste = 0
+        self.worker_bonus = 0
+        self.first_run = True
 
-    def set_spec(self, prep_time, runtime, product_value, mat_required, base_salary):
+    @abstractmethod
+    def set_spec(self,*, prep_time, runtime, product_value, mat_required, base_salary):
         self.prep_time = prep_time
         self.runtime = runtime
-        self.product_value = product_value
+        self.base_product_value = product_value
         self.mat_required = mat_required
         self.base_salary = base_salary
 
-    def add(self, machine_count):
-        self.machine_count = machine_count
+    @property  # machine_count getter/setter
+    def machine_count(self):
+        return self._machine_count
 
+    @machine_count.setter
+    def machine_count(self, machine_count):
+        self._machine_count = machine_count
+
+    @property
+    def real_runtime(self):
+        return self.runtime * (1 - self.haste)
+
+    @property
+    def real_product_value(self):
+        return self.base_product_value * (1 + self.worker_bonus) * (1 - 2 * self.haste)
 
 class SmallMachine(Machine):
+    def __init__(self):
+        super().__init__()
+
+
+    def set_spec(self, *, prep_time, runtime, product_value, mat_required, base_salary):
+        super().set_spec(prep_time=prep_time, runtime=runtime, product_value=product_value, mat_required=mat_required,
+                     base_salary=base_salary)
+
     def __str__(self):
         return ('Small machine specifications:\n' +
-                f'Preparation time = {self.prep_time}\n' +
-                f'Runtime = {self.runtime}\n' +
-                f'Product value = {self.product_value}\n' +
-                f'Material required = {self.mat_required}\n' +
                 f'Machine count = {self.machine_count}\n' +
+                f'Preparation time = {self.prep_time}\n' +
+                f'Basic runtime = {self.runtime}\n' +
+                f'Haste = {self.haste*100}%\n'+
+                f'Real runtime = {self.real_runtime}\n' +
+                f'Basic product value = {self.base_product_value}\n' +
+                f'Material required = {self.mat_required}\n' +
                 f'Base salary = {self.base_salary}\n')
 
 
 class BigMachine(Machine):
+    def __init__(self):
+        super().__init__()
+
+
+    def set_spec(self, *, prep_time, runtime, product_value, mat_required, base_salary):
+        super().set_spec(prep_time=prep_time, runtime=runtime, product_value=product_value, mat_required=mat_required,
+                     base_salary=base_salary)
+
     def __str__(self):
         return ('Big machine specifications:\n' +
-                f'Preparation time = {self.prep_time}\n' +
-                f'Runtime = {self.runtime}\n' +
-                f'Product value = {self.product_value}\n' +
-                f'Material required = {self.mat_required}\n' +
                 f'Machine count = {self.machine_count}\n' +
+                f'Preparation time = {self.prep_time}\n' +
+                f'Basic runtime = {self.runtime}\n' +
+                f'Haste = {self.haste*100}%\n' +
+                f'Real runtime = {self.real_runtime}\n' +
+                f'Basic product value = {self.base_product_value}\n' +
+                f'Material required = {self.mat_required}\n'+
+                f'Parts required = {self.parts_required}\n'+
                 f'Base salary = {self.base_salary}\n')
 
 
 class Factory:
-    def __init__(self, material, material_cost):
+    def __init__(self, *, material, material_cost):
         self.material = material
         self.material_cost = material_cost
-        self.req_small_parts = 0
-        self.req_big_parts = 0
         self.small_punish_rate = 0
         self.big_punish_rate = 0
         self.big_machine = BigMachine()
         self.small_machine = SmallMachine()
-        self.time = 0
+        self._time = 0
         self.worker_bonus = 0
-        self.haste = 0
+
 
     def __str__(self):
         return ('Factory specifications:\n' +
@@ -65,204 +149,138 @@ class Factory:
                 f'Big machines = {self.big_machine.machine_count}\n' +
                 f'Small machines = {self.small_machine.machine_count}\n'
                 f'Working time = {self.time}\n' +
-                f'Worker bonus = {self.worker_bonus}\n' +
-                f'Haste = {self.haste}\n' +
-                f'Required big parts = {self.req_big_parts}\n' +
-                f'Required small parts = {self.req_small_parts}\n')
+                f'Worker bonus = {self.worker_bonus*100}%\n')
 
-    def set_time(self, time):
-        self.time = time
+    @property # time getter/setter
+    def time(self):
+        return self._time
 
-    def add_machines(self, big_machine_count, small_machine_count):
-        self.big_machine.add(big_machine_count)
-        self.small_machine.add(small_machine_count)
+    @time.setter
+    def time(self, time):
+        self._time = time
+
+    @property
+    def shifts(self):
+        if self.time > 8:
+            return 2
+        else:
+            return 1
+
+    def add_machines(self,*, big_machine_count, small_machine_count):
+        self.big_machine.machine_count = big_machine_count
+        self.small_machine.machine_count = small_machine_count
 
     def set_worker_bonus(self, bonus):
-        self.worker_bonus = bonus
+        if bonus>=0 and bonus <=0.5:
+            self.big_machine.worker_bonus = bonus
+            self.small_machine.worker_bonus = bonus
+        else:
+            print('Workers\' bonus not changed. Enter bonus value from 0 to 0.5')
 
     def set_haste(self, haste):
-        self.haste = haste
+        if haste >= 0 and haste <= 0.5:
+            self.big_machine.haste = haste
+            self.small_machine.haste = haste
+        else:
+            print('Haste not changed. Enter haste value from 0 to 0.5')
 
-    def set_requirements(self, req_big, req_small, big_punish, small_punish):
-        self.req_big_parts = req_big
-        self.req_small_parts = req_small
+    def set_requirements(self,*, req_big, req_small, big_punish, small_punish):
+        self.big_machine.parts_required = req_big
+        self.small_machine.parts_required = req_small
         self.big_punish_rate = big_punish
         self.small_punish_rate = small_punish
 
     def run(self):
+        #reset initial values
         punish = 0
-        big_parts = 0
-        small_parts = 0
-        material_cost = self.material * self.material_cost
-        # number of workers' shifts
-        if self.time > 8:
-            shifts = 2
-        else:
-            shifts = 1
-        # real working time
-        big_working_time = self.time - shifts * self.big_machine.prep_time
-        small_working_time = self.time - shifts * self.small_machine.prep_time
-        big_real_runtime = self.big_machine.runtime * (1 - self.haste)
-        small_real_runtime = self.small_machine.runtime * (1 - self.haste)
+        self.big_machine.created_parts = 0
+        self.small_machine.created_parts = 0
+        self.small_machine.first_run = True
+        self.big_machine.first_run = True
+
+        spare_material = self.material - (self.big_machine.parts_required * self.big_machine.mat_required
+                                          + self.small_machine.parts_required * self.small_machine.mat_required)
+
+        # machines working time
+        self.big_machine.working_time = self.time - self.shifts * self.big_machine.prep_time
+        self.small_machine.working_time = self.time - self.shifts * self.small_machine.prep_time
+
 
         # created parts quantity:
         # 1. enough material for full work
-        if (big_working_time // big_real_runtime * self.big_machine.machine_count * self.big_machine.mat_required
-                + small_working_time // small_real_runtime * self.small_machine.machine_count *
+        print('1')
+        if (calc_max_parts(self.big_machine) * self.big_machine.mat_required + calc_max_parts(self.small_machine) *
                 self.small_machine.mat_required <= self.material):
-            big_parts = big_working_time // big_real_runtime * self.big_machine.machine_count
-            small_parts = small_working_time // small_real_runtime * self.small_machine.machine_count
+            self.big_machine.created_parts = calc_max_parts(self.big_machine)
+            self.small_machine.created_parts = calc_max_parts(self.small_machine)
+
         # 2. not enough material for full work but enough for requirements
-        elif (big_working_time // big_real_runtime * self.big_machine.machine_count * self.big_machine.mat_required
-              + small_working_time // small_real_runtime * self.small_machine.machine_count
-              * self.small_machine.mat_required > self.material and self.req_big_parts * self.big_machine.mat_required
-              + self.req_small_parts * self.small_machine.mat_required < self.material):
+        elif (spare_material>=0):
+            print('2')
+            # required parts:
+            ## time spent
+            self.small_machine.elapsed_time = calc_time_for_req(self.big_machine)
+            self.big_machine.elapsed_time = calc_time_for_req(self.small_machine)
+            ## created parts
+            self.big_machine.created_parts = self.big_machine.parts_required
+            self.small_machine.created_parts = self.small_machine.parts_required
 
-            spare_material = self.material - ( self.req_big_parts * self.big_machine.mat_required
-                                               + self.req_small_parts * self.small_machine.mat_required)
-
-            spare_big_parts = 0
-            spare_small_parts = 0
-
-            # calculate time spend for creating required parts
-            ## big done on 2 shifts
-            if self.big_machine.prep_time + ceil(
-                    self.req_big_parts / self.big_machine.machine_count) * big_real_runtime > 8:
-                big_requirements_time = 2 * self.big_machine.prep_time + ceil(
-                    self.req_big_parts / self.big_machine.machine_count) * big_real_runtime
-            ## big done on 1 shift
-            else:
-                big_requirements_time = self.big_machine.prep_time + ceil(
-                    self.req_big_parts / self.big_machine.machine_count) * big_real_runtime
-            ## small done on 2 shifts
-            if self.small_machine.prep_time + ceil(
-                    self.req_small_parts / self.small_machine.machine_count) * small_real_runtime > 8:
-                small_requirements_time = 2 * self.small_machine.prep_time + ceil(
-                    self.req_small_parts / self.small_machine.machine_count) * small_real_runtime
-            ## small done on 1 shift
-            else:
-                small_requirements_time = self.small_machine.prep_time + ceil(
-                    self.req_small_parts / self.small_machine.machine_count) * small_real_runtime
-
-            small_elapsed_time = small_requirements_time
-            big_elapsed_time = big_requirements_time
-            small_first_run = True
-            big_first_run = True
-
-            # calculate spare parts quantity
+            # additional parts
             while spare_material >= self.big_machine.mat_required or spare_material >= self.small_machine.mat_required:
-                # small finished first
-                if small_elapsed_time < big_elapsed_time:
-                    # first run - fill last cycle
-                    if small_first_run and self.req_small_parts % self.small_machine.machine_count != 0:
-                        # enough material
-                        if spare_material >= self.small_machine.mat_required * (self.small_machine.machine_count
-                                            -self.req_small_parts % self.small_machine.machine_count):
-                            spare_material -= self.small_machine.mat_required * (self.small_machine.machine_count
-                                            - self.req_small_parts % self.small_machine.machine_count)
-                            spare_small_parts += (self.small_machine.machine_count - self.req_small_parts
-                                                  % self.small_machine.machine_count)
-                            small_first_run = False
-
-                        # not enough material
-                        else:
-                            spare_material -= self.small_machine.mat_required * (spare_material
-                                                                                 // self.small_machine.mat_required)
-                            spare_small_parts += spare_material // self.small_machine.mat_required
-                            small_first_run = False
-
+                # small machine finished first
+                if self.small_machine.elapsed_time < self.big_machine.elapsed_time:
+                    # first cycle - fill last required parts cycle with spare parts
+                    if self.small_machine.first_run and self.small_machine.parts_required % self.small_machine.machine_count != 0:
+                        self.small_machine.created_parts += first_cycle(self.small_machine, spare_material)[0]
+                        spare_material -= first_cycle(self.small_machine, spare_material)[1]
+                        self.small_machine.first_run = False
                     # regular cycle
 
-                    elif small_first_run == False or self.req_small_parts % self.small_machine.machine_count == 0:
-                        # not enough material for all machines
-                        if spare_material // self.small_machine.mat_required < self.small_machine.machine_count:
-                            spare_small_parts += spare_material // self.small_machine.mat_required
-                            spare_material -= (spare_material // self.small_machine.mat_required) \
-                                              * self.small_machine.mat_required
-                            # workers' shift change
-                            if small_elapsed_time < 8 and small_elapsed_time + small_real_runtime > 8:
-                                small_elapsed_time += (small_real_runtime + self.small_machine.prep_time)
-                            else:
-                                small_elapsed_time += small_real_runtime
+                    else:
+                        self.small_machine.created_parts += regular_cycle(self.small_machine, spare_material)[0]
+                        spare_material -= regular_cycle(self.small_machine, spare_material)[1]
+                        self.small_machine.elapsed_time += regular_cycle(self.small_machine, spare_material)[2]
 
-                        # enough material for all machines
-                        else:
-                            spare_small_parts += self.small_machine.machine_count
-                            spare_material -= self.small_machine.machine_count * self.small_machine.mat_required
-                            # Workers' shift change
-                            if small_elapsed_time < 8 and small_elapsed_time + small_real_runtime > 8:
-                                small_elapsed_time += (small_real_runtime + self.small_machine.prep_time)
-                            else:
-                                small_elapsed_time += small_real_runtime
-
-                # big finished first
+                # big machine finished first
                 else:
-                    # first run - fill last cycle
-                    if big_first_run and self.req_big_parts % self.big_machine.machine_count != 0:
-                        if spare_material >= self.big_machine.mat_required * (self.big_machine.machine_count
-                                            - self.req_big_parts % self.big_machine.machine_count):
-                            spare_material -= self.big_machine.mat_required * (self.big_machine.machine_count
-                                            - self.req_big_parts % self.big_machine.machine_count)
-                            spare_big_parts += (self.big_machine.machine_count - self.req_big_parts
-                                                % self.big_machine.machine_count)
-                            big_first_run = False
-
-                        else:
-                            spare_material -= self.big_machine.mat_required * (spare_material // self.big_machine.mat_required)
-                            spare_big_parts += spare_material // self.big_machine.mat_required
-                            big_first_run = False
-
+                    # first cycle - fill last required parts cycle with spare parts
+                    if self.big_machine.first_run and self.big_machine.parts_required % self.big_machine.machine_count != 0:
+                        self.big_machine.created_parts += first_cycle(self.big_machine, spare_material)[0]
+                        spare_material -= first_cycle(self.big_machine, spare_material)[1]
+                        self.big_machine.first_run = False
                     # regular cycle
-                    elif big_first_run == False or self.req_big_parts % self.big_machine.machine_count == 0:
-                        # not enough material for all machines
-                        if spare_material // self.big_machine.mat_required < self.big_machine.machine_count:
-                            spare_big_parts += spare_material // self.big_machine.mat_required
-                            spare_material -= (spare_material // self.big_machine.mat_required) * self.big_machine.mat_required
-                            # workers' shift change
-                            if big_elapsed_time < 8 and big_elapsed_time + big_real_runtime > 8:
-                                big_elapsed_time += (big_real_runtime + self.big_machine.prep_time)
-                            else:
-                                big_elapsed_time += big_real_runtime
+                    else:
+                        self.big_machine.created_parts += regular_cycle(self.big_machine, spare_material)[0]
+                        spare_material -= regular_cycle(self.big_machine, spare_material)[1]
+                        self.big_machine.elapsed_time += regular_cycle(self.big_machine, spare_material)[2]
 
-                        # enough material for all machines
-                        else:
-                            spare_big_parts += self.big_machine.machine_count
-                            spare_material -= self.big_machine.machine_count * self.big_machine.mat_required
-                            # workers' shift change
-                            if big_elapsed_time < 8 and big_elapsed_time + big_real_runtime > 8:
-                                big_elapsed_time += (big_real_runtime + self.big_machine.prep_time)
-                            else:
-                                big_elapsed_time += big_real_runtime
-
-            big_parts = self.req_big_parts + spare_big_parts
-            small_parts = self.req_small_parts + spare_small_parts
 
         # 3. not enough material for requirements
-        elif (self.req_big_parts * self.big_machine.mat_required
-              + self.req_small_parts * self.small_machine.mat_required > self.material):
+        elif (spare_material<0):
             print('Impossible requirements. Add more material or set lower requirements.')
             return
         else:
             print('Unexpected outcome.')
             return
-        # punish
-        if self.req_big_parts - big_parts > 0:
-            punish += (self.req_big_parts - big_parts) * self.big_punish_rate
 
-        if self.req_small_parts - small_parts > 0:
-            punish += (self.req_small_parts - small_parts) * self.small_punish_rate
+        #calculate profit
+        material_cost = self.material * self.material_cost
+        # punish
+        if self.big_machine.parts_required - self.big_machine.created_parts > 0:
+            punish += (self.big_machine.parts_required - self.big_machine.created_parts) * self.big_punish_rate
+
+        if self.small_machine.parts_required - self.small_machine.created_parts > 0:
+            punish += (self.small_machine.parts_required - self.small_machine.created_parts) * self.small_punish_rate
 
         # values and salary
-        big_parts_value = big_parts * self.big_machine.product_value * (1 + self.worker_bonus) * (1 - 2 * self.haste)
-        big_machine_salary = shifts * self.big_machine.machine_count * self.big_machine.base_salary * (
+        big_parts_value = self.big_machine.created_parts * self.big_machine.real_product_value
+        big_machine_salary = self.shifts * self.big_machine.machine_count * self.big_machine.base_salary * (
                 1 + self.worker_bonus)
 
-        small_parts_value = small_parts * self.small_machine.product_value * (1 + self.worker_bonus) * (
-                1 - 2 * self.haste)
-        small_machine_salary = shifts * self.small_machine.machine_count * self.small_machine.base_salary * (
+        small_parts_value = self.small_machine.created_parts * self.small_machine.real_product_value
+        small_machine_salary = self.shifts * self.small_machine.machine_count * self.small_machine.base_salary * (
                 1 + self.worker_bonus)
 
         profit = big_parts_value + small_parts_value - big_machine_salary - small_machine_salary - material_cost - punish
-        self.value = profit
-        print(profit)
+        print(f'Daily profit = {profit} \n')
         return profit
