@@ -19,7 +19,7 @@ def calc_max_parts(machine):
 def calc_time_for_req(machine):
     # done on 2 shifts
     if machine.prep_time + ceil( machine.parts_required / machine.machine_count) * machine.real_runtime > 8:
-        return 2 * self.big_machine.prep_time + ceil( machine.parts_required / machine.machine_count) * machine.real_runtime
+        return 2 * machine.prep_time + ceil( machine.parts_required / machine.machine_count) * machine.real_runtime
     # done on 1 shift
     else:
         return machine.prep_time + ceil(machine.parts_required / machine.machine_count) * machine.real_runtime
