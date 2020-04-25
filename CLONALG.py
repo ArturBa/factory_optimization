@@ -12,6 +12,7 @@ requirements = { 'req_big': 20,'req_small' : 14, 'big_punish' : 2, 'small_punish
 iterations = 3
 population_size = 10
 clone_rate = 0.01
+selection_rate = 0.2
 
 #RANDOMS
 min_material = big_spec['mat_required'] * requirements['req_big'] + small_spec['mat_required'] * requirements['req_small']
@@ -100,7 +101,7 @@ def replace(population, matured):
 
 population = generate_population(population_size)
 for i in range(iterations):
-    selected = select(population, int(0.2*population_size))
+    selected = select(population, int(selection_rate*population_size))
     clones = clone(selected, clone_rate)
     matured = hypermutate(clones)
     population = replace(population, matured)
