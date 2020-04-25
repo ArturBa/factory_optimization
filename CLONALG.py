@@ -76,9 +76,43 @@ def clone(selected, clone_rate):
             clones += [cell for i in range(clone_number)]
     return clones
 
+
+def get_mutation_factor(max_value, value):
+    return (max_value-value)/max_value * 0.6 + 0.1
+
+
+def mature_material_value(current_value, mutation_factor):
+    print(f'Curr val: {current_value}')
+    val_range = int((max_material-min_material)*mutation_factor)
+    mutation_value = rd.randrange(-val_range, val_range)
+    if current_value + mutation_value > max_material: 
+        return max_material
+    elif current_value + mutation_value < min_material:
+        return min_material
+    return current_value + mutation_value
+
+
 def hypermutate(clones):
     # hypermutate clones, mutation inversely proportional to value (worse value => bigger mutation)
-    matured = clones
+    # get max value of clones
+    values = [clone['value'] for clone in clones]
+    max_value = max(values)
+
+    # create matured cells from clones
+    matured = []
+    for clone in clones:
+        mutation_factor = get_mutation_factor(max_value, clone['value'])
+        mature = {}
+        mature.update({'material': mature_material_value(clone['specifications']['material'], mutation_factor)})
+        mature.update({'big_machines': rd.randrange(1, max_machines)})
+        mature.update({'small_machines': rd.randrange(1, max_machines)})
+        mature.update({'time': rd.randrange(1, 17)})
+        mature.update({'bonus': round(rd.uniform(0,0.5),2)})
+        mature.update({'haste': round(rd.uniform(0,0.5),2)})
+        cell = create_cell(mature)
+        matured.append(cell)
+    
+    # return matured cells
     return matured
 
 def replace(population, matured):
