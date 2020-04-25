@@ -12,7 +12,6 @@ file_handler.setFormatter(formatter)
 
 logger.addHandler(file_handler)
 
-
 def calc_max_parts(machine):
     return machine.working_time // machine.real_runtime * machine.machine_count
 
@@ -119,7 +118,6 @@ class SmallMachine(Machine):
                 f'Material required = {self.mat_required}\n' +
                 f'Base salary = {self.base_salary}\n')
 
-
 class BigMachine(Machine):
     def __init__(self):
         super().__init__()
@@ -150,8 +148,8 @@ class Factory:
         self.big_machine = BigMachine()
         self.small_machine = SmallMachine()
         self._time = 0
-        self.worker_bonus = 0
-
+        self._worker_bonus = 0
+        self._haste = 0
 
     def __str__(self):
         return ('Factory specifications:\n' +
@@ -165,7 +163,6 @@ class Factory:
     @property # time getter/setter
     def time(self):
         return self._time
-
     @time.setter
     def time(self, time):
         self._time = time
@@ -226,17 +223,44 @@ class Factory:
             self.small_machine.created_parts = calc_max_parts(self.small_machine)
 
         # 2. not enough material for full work but enough for requirements
-        elif (spare_material>=0):
-            logger.info('2')
-            # required parts:
-            ## time spent
-            self.small_machine.elapsed_time = calc_time_for_req(self.big_machine)
-            self.big_machine.elapsed_time = calc_time_for_req(self.small_machine)
-            ## created parts
-            self.big_machine.created_parts = self.big_machine.parts_required
-            self.small_machine.created_parts = self.small_machine.parts_required
+        elif (big_working_time // big_real_runtime * self.big_machine.machine_count * self.big_machine.mat_required
+              + small_working_time // small_real_runtime * self.small_machine.machine_count
+              * self.small_machine.mat_required > self.material and self.req_big_parts * self.big_machine.mat_required
+              + self.req_small_parts * self.small_machine.mat_required < self.material):
 
-            # additional parts
+            spare_material = self.material - ( self.req_big_parts * self.big_machine.mat_required
+                                               + self.req_small_parts * self.small_machine.mat_required)
+
+            spare_big_parts = 0
+            spare_small_parts = 0
+
+            # calculate time spend for creating required parts
+            ## big done on 2 shifts
+            if self.big_machine.prep_time + ceil(
+                    self.req_big_parts / self.big_machine.machine_count) * big_real_runtime > 8:
+                big_requirements_time = 2 * self.big_machine.prep_time + ceil(
+                    self.req_big_parts / self.big_machine.machine_count) * big_real_runtime
+            ## big done on 1 shift
+            else:
+                big_requirements_time = self.big_machine.prep_time + ceil(
+                    self.req_big_parts / self.big_machine.machine_count) * big_real_runtime
+            ## small done on 2 shifts
+            if self.small_machine.prep_time + ceil(
+                    self.req_small_parts / self.small_machine.machine_count) * small_real_runtime > 8:
+                small_requirements_time = 2 * self.small_machine.prep_time + ceil(
+                    self.req_small_parts / self.small_machine.machine_count) * small_real_runtime
+            ## small done on 1 shift
+            else:
+                small_requirements_time = self.small_machine.prep_time + ceil(
+                    self.req_small_parts / self.small_machine.machine_count) * small_real_runtime
+
+            small_elapsed_time = small_requirements_time
+            big_elapsed_time = big_requirements_time
+            small_first_run = True
+            big_first_run = True
+
+
+            # calculate spare parts quantity
             while spare_material >= self.big_machine.mat_required or spare_material >= self.small_machine.mat_required:
                 # small machine finished first
                 if self.small_machine.elapsed_time < self.big_machine.elapsed_time:
