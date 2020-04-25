@@ -73,6 +73,8 @@ def clone(selected, clone_rate):
     for cell in selected:
         if cell['value'] > 0:
             clone_number = int(clone_rate * cell['value'])
+            if clone_number > 0.2 * population_size:
+                clone_number = int(0.2 * population_size)
             clones += [cell for i in range(clone_number)]
     return clones
 
