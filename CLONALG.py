@@ -3,13 +3,14 @@ from factoryclasses import SmallMachine
 from factoryclasses import BigMachine
 import random as rd
 import pprint
+import matplotlib.pyplot as plt
 
 # CONSTANTS - WARTOSCI DO UZGODNIENIA
 material_cost = 1
 big_spec = {'prep_time': 1, 'runtime': 2, 'product_value': 40, 'mat_required': 4, 'base_salary': 5}
 small_spec = {'prep_time': 1, 'runtime': 2, 'product_value': 40, 'mat_required': 4, 'base_salary': 5}
 requirements = {'req_big': 20, 'req_small': 14, 'big_punish': 2, 'small_punish': 2}
-iterations = 3
+iterations = 10
 population_size = 10
 clone_rate = 0.01
 selection_rate = 0.2
@@ -186,26 +187,20 @@ def replace(population, matured):
     return new_population
 
 
-# jakis print/log typu nr iteracji, najlepszy wynik, najgorszy wynik
-# jak starczy czasu to można dać jakiś wykresik
-
-# ALGORYTM
-# generate_population
-# while something:
-# select x
-# clone x
-# mutate clones
-# replace cells fith better clones (keep original population size)
-# print results
-
 population = generate_population(population_size)
+best = []
+worst = []
 for i in range(iterations):
     selected = select(population, int(selection_rate * population_size))
     clones = clone(selected, clone_rate)
     matured = hypermutate(clones)
     population = replace(population, matured)
     best_value = sorted(population, key=lambda population: population['value'], reverse=True)[0]['value']
+    best.append(best_value)
     worst_value = sorted(population, key=lambda population: population['value'], reverse=True)[population_size - 1][
         'value']
+    worst.append(worst_value)
     print(f'Iteration: {i + 1}\t Best value: {best_value}\t Worst value: {worst_value}\n')
 pprint.pprint(sorted(population, key=lambda population: population['value'], reverse=True)[0])
+plt.plot(range(iterations), best, 'ro', range(iterations), worst, 'bo')
+plt.show()
