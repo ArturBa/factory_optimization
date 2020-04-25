@@ -293,6 +293,6 @@ class Factory:
         small_machine_salary = self.shifts * self.small_machine.machine_count * self.small_machine.base_salary * (
                 1 + self.worker_bonus)
 
-        profit = big_parts_value + small_parts_value - big_machine_salary - small_machine_salary - material_cost - punish
+        profit = round(big_parts_value + small_parts_value - big_machine_salary - small_machine_salary - material_cost - punish,2)
         logger.info(f'Daily profit = {profit} \n')
         return profit
