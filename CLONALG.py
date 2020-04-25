@@ -9,6 +9,8 @@ material_cost = 1
 big_spec = {'prep_time': 1, 'runtime': 2, 'product_value' : 40, 'mat_required': 4, 'base_salary': 5}
 small_spec = {'prep_time': 1, 'runtime': 2, 'product_value' : 40, 'mat_required': 4, 'base_salary': 5}
 requirements = { 'req_big': 20,'req_small' : 14, 'big_punish' : 2, 'small_punish' : 2}
+iterations = 3
+population_size = 10
 
 #RANDOMS
 min_material = big_spec['mat_required'] * requirements['req_big'] + small_spec['mat_required'] * requirements['req_small']
@@ -65,18 +67,19 @@ def select(population, x):
 
 def clone(selected):
     # clone cells, clones count proportional to cell's value
-    # return clones
-    pass
+    clones = selected
+    return clones
 
 def hypermutate(clones):
     # hypermutate clones, mutation inversely proportional to value (worse value => bigger mutation)
-    # return new_clones
-    pass
+    matured = clones
+    return matured
 
-def replace(population, clones):
+def replace(population, matured):
     # replace cells with better clones
     # probability of replacement based on value
-    pass
+    new_population = population
+    return new_population
 
 # jakis print/log typu nr iteracji, najlepszy wynik, najgorszy wynik
 # jak starczy czasu to można dać jakiś wykresik
@@ -90,5 +93,13 @@ def replace(population, clones):
     #replace cells fith better clones (keep original population size)
     #print results
 
-population = generate_population(2)
-pprint.pprint(population, sort_dicts=False)
+population = generate_population(population_size)
+for i in range(iterations):
+    selected = select(population, int(0.2*population_size))
+    clones = clone(selected)
+    matured = hypermutate(clones)
+    population = replace(population, matured)
+    best_value = sorted(population, key=lambda population: population['value'], reverse=True)[0]['value']
+    worst_value = sorted(population, key=lambda population: population['value'], reverse=True)[population_size-1]['value']
+    print(f'Iteration: {i+1}\t Best value: {best_value}\t Worst value: {worst_value}\n')
+pprint.pprint(population[0], sort_dicts=False)
