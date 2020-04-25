@@ -107,4 +107,4 @@ for i in range(iterations):
     best_value = sorted(population, key=lambda population: population['value'], reverse=True)[0]['value']
     worst_value = sorted(population, key=lambda population: population['value'], reverse=True)[population_size-1]['value']
     print(f'Iteration: {i+1}\t Best value: {best_value}\t Worst value: {worst_value}\n')
-pprint.pprint(population[0], sort_dicts=False)
+pprint.pprint(sorted(population, key=lambda population: population['value'], reverse=True)[0], sort_dicts=False)
