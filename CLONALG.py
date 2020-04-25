@@ -11,6 +11,7 @@ small_spec = {'prep_time': 1, 'runtime': 2, 'product_value' : 40, 'mat_required'
 requirements = { 'req_big': 20,'req_small' : 14, 'big_punish' : 2, 'small_punish' : 2}
 iterations = 3
 population_size = 10
+clone_rate = 0.01
 
 #RANDOMS
 min_material = big_spec['mat_required'] * requirements['req_big'] + small_spec['mat_required'] * requirements['req_small']
@@ -65,9 +66,13 @@ def select(population, x):
     selected = sorted(population, key=lambda population: population['value'], reverse=True)[:x]
     return selected
 
-def clone(selected):
+def clone(selected, clone_rate):
     # clone cells, clones count proportional to cell's value
-    clones = selected
+    clones = []
+    for cell in selected:
+        if cell['value'] > 0:
+            clone_number = int(clone_rate * cell['value'])
+            clones += [cell for i in range(clone_number)]
     return clones
 
 def hypermutate(clones):
@@ -96,7 +101,7 @@ def replace(population, matured):
 population = generate_population(population_size)
 for i in range(iterations):
     selected = select(population, int(0.2*population_size))
-    clones = clone(selected)
+    clones = clone(selected, clone_rate)
     matured = hypermutate(clones)
     population = replace(population, matured)
     best_value = sorted(population, key=lambda population: population['value'], reverse=True)[0]['value']
