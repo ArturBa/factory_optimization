@@ -12,9 +12,10 @@ material_cost = 10
 big_spec = {'prep_time': 1, 'runtime': 2, 'product_value': 40, 'mat_required': 4, 'base_salary': 5}
 small_spec = {'prep_time': 1, 'runtime': 2, 'product_value': 40, 'mat_required': 4, 'base_salary': 5}
 requirements = {'req_big': 20, 'req_small': 14, 'big_punish': 2, 'small_punish': 2}
-iterations = 10
-population_size = 5
-clone_rate = 3
+iterations = 100
+population_size = 30
+clone_rate = 30
+min_clones = 10
 selection_rate = 0.2
 
 # RANDOMS
@@ -85,12 +86,20 @@ def select(population, x):
     return selected
 
 
+def clone_factor(value, value_range):
+    return (value - value_range[0])/(value_range[1] - value_range[0])
+
+
 def clone(selected, clone_rate):
     # clone cells, clones count proportional to cell's value
-    # TODO fix cloning algorithm
+    max_value = max([sel['value'] for sel in selected])
+    min_value = min([sel['value'] for sel in selected])
+    print([sel['value'] for sel in selected])
     clones = []
     for cell in selected:
-        clone_number = int(clone_rate)
+        factor = clone_factor(cell['value'], [min_value, max_value])
+        clone_number = int(clone_rate*factor + min_clones)
+        print(f"val: {cell['value']}\tfactor: {factor}\tclones: {clone_number}")
         if clone_number > 0.2 * population_size:
             clone_number = int(0.2 * population_size)
         clones += [cell for i in range(clone_number)]
