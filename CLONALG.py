@@ -33,6 +33,12 @@ max_hastle = 0.5
 # object - stworzony obiekt
 # value - wartosc funkcji celu
 
+def calculate_avrg(population):
+    sum = 0
+    for cell in population:
+        sum += cell['value']
+    return sum/len(population)
+
 def create_cell(specs):
     # create cell with given specifications
     cell = {}
@@ -234,6 +240,7 @@ def replace(population, matured):
 population = generate_population(population_size)
 best = []
 worst = []
+avrg = []
 for i in range(iterations):
     selected = select(population, int(selection_rate * population_size))
     clones = clone(selected, clone_rate)
@@ -244,7 +251,9 @@ for i in range(iterations):
     worst_value = sorted(population, key=lambda population: population['value'], reverse=True)[population_size - 1][
         'value']
     worst.append(worst_value)
-    print(f'Iteration: {i + 1}\t Best value: {best_value}\t Worst value: {worst_value}\n')
+    avrg_value = calculate_avrg(population)
+    avrg.append(avrg_value)
+    print(f'Iteration: {i + 1}\t Best value: {best_value}\t Worst value: {worst_value}\t Avarage value: {avrg_value}\n')
 pprint.pprint(sorted(population, key=lambda population: population['value'], reverse=True)[0])
-plt.plot(range(iterations), best, 'ro', range(iterations), worst, 'bo')
+plt.plot(range(iterations), best, 'ro', range(iterations), worst, 'bo', range(iterations), avrg, 'go')
 plt.show()
