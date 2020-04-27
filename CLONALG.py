@@ -5,6 +5,7 @@ import random as rd
 import pprint
 import matplotlib.pyplot as plt
 import bisect
+import math
 
 # CONSTANTS - WARTOSCI DO UZGODNIENIA
 material_cost = 10
@@ -17,8 +18,8 @@ clone_rate = 3
 selection_rate = 0.2
 
 # RANDOMS
-min_material = big_spec['mat_required'] * requirements['req_big'] + small_spec['mat_required'] * \
-               requirements['req_small']
+min_material = big_spec['mat_required'] * requirements['req_big'] + \
+               small_spec['mat_required'] * requirements['req_small']
 max_material = min_material * 100
 max_machines = 30
 max_working_time = 16
@@ -250,7 +251,7 @@ if __name__ == '__main__':
     worst = []
     avrg = []
     for i in range(iterations):
-        selected = select(population, int(selection_rate * population_size))
+        selected = select(population, math.ceil(selection_rate * population_size))
         clones = clone(selected, clone_rate)
         matured = hypermutate(clones)
         population = replace(population, matured)
