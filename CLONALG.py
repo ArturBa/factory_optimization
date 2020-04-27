@@ -112,7 +112,7 @@ def get_mutation_factor(max_value, value):
 
 def mature_material(current_value, mutation_factor):
     # get change range
-    val_range = int((max_material - min_material) * mutation_factor)
+    val_range = math.ceil((max_material - min_material) * mutation_factor)
     # get change value
     mutation_value = rd.randrange(-val_range, val_range)
 
@@ -126,7 +126,7 @@ def mature_material(current_value, mutation_factor):
 
 def mature_machine_number(current_value, mutation_factor):
     # get change range
-    val_range = int(max_machines * mutation_factor)
+    val_range = math.ceil(max_machines * mutation_factor)
     # get change value
     mutation_value = rd.randrange(-val_range, val_range)
     if current_value + mutation_value > max_machines:
@@ -138,7 +138,7 @@ def mature_machine_number(current_value, mutation_factor):
 
 def mature_time(current_value, mutation_factor):
     # get change range
-    val_range = int(max_working_time * mutation_factor)
+    val_range = math.ceil(max_working_time * mutation_factor)
     # get change value
     mutation_value = rd.randrange(-val_range, val_range)
     if current_value + mutation_value > max_working_time:
