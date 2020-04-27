@@ -222,12 +222,12 @@ def replace(population, matured):
 
         considered_m = []
         for mature in matured:
-            if mature['value'] > considered_p[choosen]['value']:
+            if mature['value'] >  sorted(considered_p, key=lambda considered_p: considered_p['value'], reverse=False)[choosen]['value']:
                 considered_m.append(mature)
         
-        index_to_change = new_population.index(considered_p[choosen])
+        index_to_change = new_population.index( sorted(considered_p, key=lambda considered_p: considered_p['value'], reverse=False)[choosen] )
         new_population[index_to_change] = considered_m[rd.randint(0,len(considered_m)-1)]
-        
+
     return new_population
 
 
