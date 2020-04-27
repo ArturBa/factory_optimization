@@ -42,9 +42,9 @@ def create_cell(specs):
     factory.big_machine.set_spec(prep_time=big_spec['prep_time'], runtime=big_spec['runtime'],
                                  product_value=big_spec['product_value'],
                                  mat_required=big_spec['mat_required'], base_salary=big_spec['base_salary'])
-    factory.small_machine.set_spec(prep_time=big_spec['prep_time'], runtime=big_spec['runtime'],
-                                   product_value=big_spec['product_value'],
-                                   mat_required=big_spec['mat_required'], base_salary=big_spec['base_salary'])
+    factory.small_machine.set_spec(prep_time=small_spec['prep_time'], runtime=small_spec['runtime'],
+                                   product_value=small_spec['product_value'],
+                                   mat_required=small_spec['mat_required'], base_salary=small_spec['base_salary'])
     factory.time = specs['time']
     factory.set_requirements(req_big=requirements['req_big'], req_small=requirements['req_small'],
                              big_punish=requirements['big_punish'], small_punish=requirements['small_punish'])
