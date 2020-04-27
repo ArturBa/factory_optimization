@@ -12,7 +12,7 @@ big_spec = {'prep_time': 1, 'runtime': 2, 'product_value': 40, 'mat_required': 4
 small_spec = {'prep_time': 1, 'runtime': 2, 'product_value': 40, 'mat_required': 4, 'base_salary': 5}
 requirements = {'req_big': 20, 'req_small': 14, 'big_punish': 2, 'small_punish': 2}
 iterations = 10
-population_size = 100
+population_size = 5
 clone_rate = 3
 selection_rate = 0.2
 
@@ -97,7 +97,7 @@ def clone(selected, clone_rate):
 
 
 def get_mutation_factor(max_value, value):
-    return (max_value - value) / max_value * 0.6 + 0.1
+    return abs(max_value - value) / max_value * 0.6 + 0.1
 
 
 def mature_material(current_value, mutation_factor):
@@ -167,8 +167,6 @@ def hypermutate(clones):
     # get max value of clones
     values = [clone['value'] for clone in clones]
     max_value = max(values)
-    if max_value < 0:
-        max_value *= -0.6
 
     # create matured cells from clones
     matured = []
