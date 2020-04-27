@@ -7,23 +7,23 @@ import matplotlib.pyplot as plt
 import bisect
 
 # CONSTANTS - WARTOSCI DO UZGODNIENIA
-material_cost = 1
+material_cost = 10
 big_spec = {'prep_time': 1, 'runtime': 2, 'product_value': 40, 'mat_required': 4, 'base_salary': 5}
 small_spec = {'prep_time': 1, 'runtime': 2, 'product_value': 40, 'mat_required': 4, 'base_salary': 5}
 requirements = {'req_big': 20, 'req_small': 14, 'big_punish': 2, 'small_punish': 2}
 iterations = 10
-population_size = 10
-clone_rate = 0.01
+population_size = 100
+clone_rate = 3
 selection_rate = 0.2
 
 # RANDOMS
-min_material = big_spec['mat_required'] * requirements['req_big'] + small_spec['mat_required'] * requirements[
-    'req_small']
-max_material = min_material * 5
+min_material = big_spec['mat_required'] * requirements['req_big'] + small_spec['mat_required'] * \
+               requirements['req_small']
+max_material = min_material * 100
 max_machines = 30
 max_working_time = 16
 max_bonus = 0.5
-max_hastle = 0.5
+max_haste = 0.5
 
 
 # PROPONOWANA FORMA ZAPISU POPULACJI
@@ -34,10 +34,11 @@ max_hastle = 0.5
 # value - wartosc funkcji celu
 
 def calculate_avrg(population):
-    sum = 0
+    value_sum = 0
     for cell in population:
-        sum += cell['value']
-    return sum/len(population)
+        value_sum += cell['value']
+    return value_sum / len(population)
+
 
 def create_cell(specs):
     # create cell with given specifications
@@ -71,7 +72,7 @@ def generate_population(size):
         random.update({'small_machines': rd.randrange(1, max_machines)})
         random.update({'time': rd.randrange(1, max_working_time + 1)})
         random.update({'bonus': round(rd.uniform(0, max_bonus), 2)})
-        random.update({'haste': round(rd.uniform(0, max_hastle), 2)})
+        random.update({'haste': round(rd.uniform(0, max_haste), 2)})
         cell = create_cell(random)
         population.append(cell)
     return population
@@ -85,13 +86,13 @@ def select(population, x):
 
 def clone(selected, clone_rate):
     # clone cells, clones count proportional to cell's value
+    # TODO fix cloning algorithm
     clones = []
     for cell in selected:
-        if cell['value'] > 0:
-            clone_number = int(clone_rate * cell['value'])
-            if clone_number > 0.2 * population_size:
-                clone_number = int(0.2 * population_size)
-            clones += [cell for i in range(clone_number)]
+        clone_number = int(clone_rate)
+        if clone_number > 0.2 * population_size:
+            clone_number = int(0.2 * population_size)
+        clones += [cell for i in range(clone_number)]
     return clones
 
 
@@ -151,11 +152,11 @@ def mature_bonus(current_value, mutation_factor):
 
 def mature_haste(current_value, mutation_factor):
     # get change range
-    val_range = max_hastle * mutation_factor
+    val_range = max_haste * mutation_factor
     # get change value
     mutation_value = round(rd.uniform(-val_range, val_range), 2)
-    if current_value + mutation_value > max_hastle:
-        return max_hastle
+    if current_value + mutation_value > max_haste:
+        return max_haste
     if current_value + mutation_value < 0:
         return 0
     return current_value + mutation_value
@@ -166,6 +167,8 @@ def hypermutate(clones):
     # get max value of clones
     values = [clone['value'] for clone in clones]
     max_value = max(values)
+    if max_value < 0:
+        max_value *= -0.6
 
     # create matured cells from clones
     matured = []
@@ -188,19 +191,21 @@ def hypermutate(clones):
 
 
 def cdf(how_many, b):
-    #weights calculated on the basis of the parabola of the quadratic equation with the given parameter b: a*x^2 + b*x + c = 0 
-    #b should be within the range (1,2)
+    # weights calculated on the basis of the parabola of the quadratic equation with the given parameter b: a*x^2 + b*x + c = 0
+    # b should be within the range (1,2)
     assert 2 > b > 1
     result = []
     for i in range(1, how_many):
-        result.append((1-b)*(i/how_many)**2 + b * (i/how_many) )
+        result.append((1 - b) * (i / how_many) ** 2 + b * (i / how_many))
     return result
+
 
 def choice(population):
     cdf_vals = cdf(len(population), 1.5)
     x = rd.random()
     idx = bisect.bisect(cdf_vals, x)
     return idx
+
 
 def replace(population, matured):
     # replace cells with better clones
@@ -213,47 +218,56 @@ def replace(population, matured):
     for cell in population:
         if cell['value'] < max_value:
             considered_p.append(cell)
-    
-    if len(considered_p) < round(selection_rate *len(population)):
+
+    if len(considered_p) < round(selection_rate * len(population)):
         how_many_changes = len(considered_p)
     else:
-        how_many_changes = round(selection_rate *len(population))
+        how_many_changes = round(selection_rate * len(population))
 
     already_changed = []
-    while(len(already_changed) < how_many_changes):
+    while (len(already_changed) < how_many_changes):
         choosen = -1 if len(already_changed) == 0 else already_changed[0]
         while choosen in already_changed or choosen == -1:
-            choosen = choice( sorted(considered_p, key=lambda considered_p: considered_p['value'], reverse=False) )# get index of cell that will be changed
+            choosen = choice(sorted(considered_p, key=lambda considered_p: considered_p['value'],
+                                    reverse=False))  # get index of cell that will be changed
         already_changed.append(choosen)
 
         considered_m = []
         for mature in matured:
-            if mature['value'] >  sorted(considered_p, key=lambda considered_p: considered_p['value'], reverse=False)[choosen]['value']:
+            if mature['value'] > \
+                    sorted(considered_p, key=lambda considered_p: considered_p['value'], reverse=False)[choosen][
+                        'value']:
                 considered_m.append(mature)
-        
-        index_to_change = new_population.index( sorted(considered_p, key=lambda considered_p: considered_p['value'], reverse=False)[choosen] )
-        new_population[index_to_change] = considered_m[rd.randint(0,len(considered_m)-1)]
+
+        index_to_change = new_population.index(
+            sorted(considered_p, key=lambda considered_p: considered_p['value'], reverse=False)[choosen])
+        new_population[index_to_change] = considered_m[rd.randint(0, len(considered_m) - 1)]
 
     return new_population
 
 
-population = generate_population(population_size)
-best = []
-worst = []
-avrg = []
-for i in range(iterations):
-    selected = select(population, int(selection_rate * population_size))
-    clones = clone(selected, clone_rate)
-    matured = hypermutate(clones)
-    population = replace(population, matured)
-    best_value = sorted(population, key=lambda population: population['value'], reverse=True)[0]['value']
-    best.append(best_value)
-    worst_value = sorted(population, key=lambda population: population['value'], reverse=True)[population_size - 1][
-        'value']
-    worst.append(worst_value)
-    avrg_value = calculate_avrg(population)
-    avrg.append(avrg_value)
-    print(f'Iteration: {i + 1}\t Best value: {best_value}\t Worst value: {worst_value}\t Avarage value: {avrg_value}\n')
-pprint.pprint(sorted(population, key=lambda population: population['value'], reverse=True)[0])
-plt.plot(range(iterations), best, 'ro', range(iterations), worst, 'bo', range(iterations), avrg, 'go')
-plt.show()
+if __name__ == '__main__':
+    population = generate_population(population_size)
+    best = []
+    worst = []
+    avrg = []
+    for i in range(iterations):
+        selected = select(population, int(selection_rate * population_size))
+        clones = clone(selected, clone_rate)
+        matured = hypermutate(clones)
+        population = replace(population, matured)
+        best_value = sorted(population, key=lambda population: population['value'], reverse=True)[0]['value']
+        best.append(best_value)
+        worst_value = sorted(population, key=lambda population: population['value'], reverse=True)[population_size - 1][
+            'value']
+        worst.append(worst_value)
+        avrg_value = calculate_avrg(population)
+        avrg.append(avrg_value)
+        print(f'Iteration: {i + 1}\t Best value: {best_value}\t Worst value: {worst_value}\t Avarage value: {avrg_value}\n')
+    pprint.pprint(sorted(population, key=lambda population: population['value'], reverse=True)[0])
+    plt.plot(range(iterations), best, 'ro', range(iterations), worst, 'bo', range(iterations), avrg, 'go')
+    plt.xlabel('Iteracja')
+    plt.ylabel('Wartość funkcji celu')
+    plt.title('Wykres wartości funkcji celu od iteracji podczas uczenia')
+    plt.legend(['Watość maksymalna', 'Wartość minimalna', 'Wartość średnia'])
+    plt.show()
