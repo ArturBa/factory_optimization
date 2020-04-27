@@ -87,6 +87,8 @@ def select(population, x):
 
 
 def clone_factor(value, value_range):
+    if value_range[0] == value_range[1]:
+        return 1
     return (value - value_range[0])/(value_range[1] - value_range[0])
 
 
@@ -94,12 +96,10 @@ def clone(selected, clone_rate):
     # clone cells, clones count proportional to cell's value
     max_value = max([sel['value'] for sel in selected])
     min_value = min([sel['value'] for sel in selected])
-    print([sel['value'] for sel in selected])
     clones = []
     for cell in selected:
         factor = clone_factor(cell['value'], [min_value, max_value])
         clone_number = int(clone_rate*factor + min_clones)
-        print(f"val: {cell['value']}\tfactor: {factor}\tclones: {clone_number}")
         if clone_number > 0.2 * population_size:
             clone_number = int(0.2 * population_size)
         clones += [cell for i in range(clone_number)]
@@ -107,7 +107,7 @@ def clone(selected, clone_rate):
 
 
 def get_mutation_factor(max_value, value):
-    return abs(max_value - value) / max_value * 0.6 + 0.1
+    return abs((max_value - value) / max_value * 0.6 + 0.1)
 
 
 def mature_material(current_value, mutation_factor):
