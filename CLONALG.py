@@ -4,6 +4,7 @@ from factoryclasses import BigMachine
 import random as rd
 import pprint
 import matplotlib.pyplot as plt
+import bisect
 
 # CONSTANTS - WARTOSCI DO UZGODNIENIA
 material_cost = 1
@@ -180,10 +181,53 @@ def hypermutate(clones):
     return matured
 
 
+def cdf(how_many, b):
+    #weights calculated on the basis of the parabola of the quadratic equation with the given parameter b: a*x^2 + b*x + c = 0 
+    #b should be within the range (1,2)
+    assert 2 > b > 1
+    result = []
+    for i in range(1, how_many):
+        result.append((1-b)*(i/how_many)**2 + b * (i/how_many) )
+    return result
+
+def choice(population):
+    cdf_vals = cdf(len(population), 1.5)
+    x = rd.random()
+    idx = bisect.bisect(cdf_vals, x)
+    return idx
+
 def replace(population, matured):
     # replace cells with better clones
     # probability of replacement based on value
     new_population = population
+
+    max_value = sorted(matured, key=lambda matured: matured['value'], reverse=True)[0]['value']
+
+    considered_p = []
+    for cell in population:
+        if cell['value'] < max_value:
+            considered_p.append(cell)
+    
+    if len(considered_p) < round(selection_rate *len(population)):
+        how_many_changes = len(considered_p)
+    else:
+        how_many_changes = round(selection_rate *len(population))
+
+    already_changed = []
+    while(len(already_changed) < how_many_changes):
+        choosen = -1 if len(already_changed) == 0 else already_changed[0]
+        while choosen in already_changed or choosen == -1:
+            choosen = choice( sorted(considered_p, key=lambda considered_p: considered_p['value'], reverse=False) )# get index of cell that will be changed
+        already_changed.append(choosen)
+
+        considered_m = []
+        for mature in matured:
+            if mature['value'] > considered_p[choosen]['value']:
+                considered_m.append(mature)
+        
+        index_to_change = new_population.index(considered_p[choosen])
+        new_population[index_to_change] = considered_m[rd.randint(0,len(considered_m)-1)]
+        
     return new_population
 
 
