@@ -12,8 +12,7 @@ small_spec = {'prep_time': 1, 'runtime': 2, 'product_value': 40, 'mat_required':
 requirements = {'req_big': 20, 'req_small': 14, 'big_punish': 2, 'small_punish': 2}
 iterations = 100
 population_size = 3
-clone_rate = 30
-min_clones = 10
+clone_rate = 0.4
 selection_rate = 0.2
 
 # RANDOMS
@@ -97,8 +96,7 @@ def clone(selected, clone_rate):
     clones = []
     for cell in selected:
         factor = clone_factor(cell['value'], [min_value, max_value])
-        print(f'clone factor {factor}')
-        clone_number = int(clone_rate*factor + min_clones)
+        clone_number = math.ceil(clone_rate * factor * population_size) + math.ceil(0.1 * population_size)
         if clone_number > 0.2 * population_size:
             clone_number = math.ceil(0.2 * population_size)
         clones += [cell for i in range(clone_number)]
