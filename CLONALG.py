@@ -1,6 +1,4 @@
 from factoryclasses import Factory
-from factoryclasses import SmallMachine
-from factoryclasses import BigMachine
 import random as rd
 import pprint
 import matplotlib.pyplot as plt
@@ -13,7 +11,7 @@ big_spec = {'prep_time': 1, 'runtime': 2, 'product_value': 40, 'mat_required': 4
 small_spec = {'prep_time': 1, 'runtime': 2, 'product_value': 40, 'mat_required': 4, 'base_salary': 5}
 requirements = {'req_big': 20, 'req_small': 14, 'big_punish': 2, 'small_punish': 2}
 iterations = 100
-population_size = 30
+population_size = 3
 clone_rate = 30
 min_clones = 10
 selection_rate = 0.2
@@ -99,9 +97,10 @@ def clone(selected, clone_rate):
     clones = []
     for cell in selected:
         factor = clone_factor(cell['value'], [min_value, max_value])
+        print(f'clone factor {factor}')
         clone_number = int(clone_rate*factor + min_clones)
         if clone_number > 0.2 * population_size:
-            clone_number = int(0.2 * population_size)
+            clone_number = math.ceil(0.2 * population_size)
         clones += [cell for i in range(clone_number)]
     return clones
 
@@ -271,7 +270,8 @@ if __name__ == '__main__':
         worst.append(worst_value)
         avrg_value = calculate_avrg(population)
         avrg.append(avrg_value)
-        print(f'Iteration: {i + 1}\t Best value: {best_value}\t Worst value: {worst_value}\t Avarage value: {avrg_value}\n')
+        print(
+            f'Iteration: {i + 1}\t Best value: {best_value}\t Worst value: {worst_value}\t Avarage value: {avrg_value}')
     pprint.pprint(sorted(population, key=lambda population: population['value'], reverse=True)[0])
     plt.plot(range(iterations), best, 'ro', range(iterations), worst, 'bo', range(iterations), avrg, 'go')
     plt.xlabel('Iteracja')
