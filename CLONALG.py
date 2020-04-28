@@ -6,12 +6,12 @@ import bisect
 import math
 
 # CONSTANTS - WARTOSCI DO UZGODNIENIA
-material_cost = 10
+material_cost = 1
 big_spec = {'prep_time': 1, 'runtime': 2, 'product_value': 40, 'mat_required': 4, 'base_salary': 5}
 small_spec = {'prep_time': 1, 'runtime': 2, 'product_value': 40, 'mat_required': 4, 'base_salary': 5}
 requirements = {'req_big': 20, 'req_small': 14, 'big_punish': 2, 'small_punish': 2}
 iterations = 100
-population_size = 3
+population_size = 300
 clone_rate = 0.4
 selection_rate = 0.2
 
@@ -85,7 +85,7 @@ def select(population, x):
 
 def clone_factor(value, value_range):
     if value_range[0] == value_range[1]:
-        return 1
+        return 0
     return (value - value_range[0])/(value_range[1] - value_range[0])
 
 
@@ -96,7 +96,7 @@ def clone(selected, clone_rate):
     clones = []
     for cell in selected:
         factor = clone_factor(cell['value'], [min_value, max_value])
-        clone_number = math.ceil(clone_rate * factor * population_size) + math.ceil(0.1 * population_size)
+        clone_number = math.ceil(clone_rate * factor * population_size) + math.ceil(0.01 * population_size)
         if clone_number > 0.2 * population_size:
             clone_number = math.ceil(0.2 * population_size)
         clones += [cell for i in range(clone_number)]
@@ -263,14 +263,13 @@ if __name__ == '__main__':
         population = replace(population, matured)
         best_value = sorted(population, key=lambda population: population['value'], reverse=True)[0]['value']
         best.append(best_value)
-        worst_value = sorted(population, key=lambda population: population['value'], reverse=True)[population_size - 1][
-            'value']
+        worst_value = sorted(population, key=lambda population: population['value'], reverse=True)[-1]['value']
         worst.append(worst_value)
         avrg_value = calculate_avrg(population)
         avrg.append(avrg_value)
-        print(
-            f'Iteration: {i + 1}\t Best value: {best_value}\t Worst value: {worst_value}\t Avarage value: {avrg_value}')
-    pprint.pprint(sorted(population, key=lambda population: population['value'], reverse=True)[0])
+        print(f'Iteration: {i + 1}\tBest value: {best_value}\t'
+              f'Worst value: {worst_value}\tAverage value: {avrg_value}')
+    pprint.pprint(sorted(population, key=lambda population_value: population_value['value'], reverse=True)[0])
     plt.plot(range(iterations), best, 'ro', range(iterations), worst, 'bo', range(iterations), avrg, 'go')
     plt.xlabel('Iteracja')
     plt.ylabel('Wartość funkcji celu')
