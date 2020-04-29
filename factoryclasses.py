@@ -97,7 +97,7 @@ class Machine(ABC):
 
     @property
     def real_product_value(self):
-        return self.base_product_value * (1 + self.worker_bonus) * (1 - 2 * self.haste)
+        return self.base_product_value * (1 + 0.5 * self.worker_bonus) * (1 - 2 * self.haste)
 
 class SmallMachine(Machine):
     def __init__(self):
@@ -286,13 +286,12 @@ class Factory:
 
         # values and salary
         big_parts_value = self.big_machine.created_parts * self.big_machine.real_product_value
-        big_machine_salary = self.shifts * self.big_machine.machine_count * self.big_machine.base_salary * (
+        big_machine_salary = self.shifts * 8 * self.big_machine.machine_count * self.big_machine.base_salary * (
                 1 + self.worker_bonus)
 
         small_parts_value = self.small_machine.created_parts * self.small_machine.real_product_value
-        small_machine_salary = self.shifts * self.small_machine.machine_count * self.small_machine.base_salary * (
+        small_machine_salary = self.shifts * 8 * self.small_machine.machine_count * self.small_machine.base_salary * (
                 1 + self.worker_bonus)
-
         profit = round(big_parts_value + small_parts_value - big_machine_salary - small_machine_salary - material_cost - punish,2)
         logger.info(f'Daily profit = {profit} \n')
         return profit
