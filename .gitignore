@@ -1,0 +1,7 @@
+# ignore factory log
+factoryclasses.log
+
+# Ignore python/jupyter cache
+__pycache__
+venv
+.ipynb_checkpoints
