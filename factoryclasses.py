@@ -62,6 +62,15 @@ def regular_cycle(machine, spare_material):
         return created_parts, used_material, elapsed_time
 
 
+def calc_value(machine, multi):
+    if machine.created_parts < multi * machine.parts_required:
+        value = machine.created_parts * machine.real_product_value
+    else:
+        value = multi * machine.parts_required * machine.real_product_value
+        value += (machine.created_parts - (multi * machine.parts_required)) * 0.75 * machine.real_product_value
+    return value
+
+
 class Machine(ABC):
     def __init__(self):
         self.prep_time = 0
@@ -282,14 +291,12 @@ class Factory:
         # punish
         if self.big_machine.parts_required - self.big_machine.created_parts > 0:
             punish += (self.big_machine.parts_required - self.big_machine.created_parts) * self.big_punish_rate
-
         if self.small_machine.parts_required - self.small_machine.created_parts > 0:
             punish += (self.small_machine.parts_required - self.small_machine.created_parts) * self.small_punish_rate
-
         # values and salary
-        big_parts_value = self.big_machine.created_parts * self.big_machine.real_product_value
+        big_parts_value = calc_value(self.big_machine, 2)
         big_machine_salary = self.shifts * 8 * self.big_machine.machine_count * self.big_machine.real_salary
-        small_parts_value = self.small_machine.created_parts * self.small_machine.real_product_value
+        small_parts_value = calc_value(self.small_machine, 2)
         small_machine_salary = self.shifts * 8 * self.small_machine.machine_count * self.small_machine.real_salary
         profit = round(
             big_parts_value + small_parts_value - big_machine_salary - small_machine_salary - material_cost - punish, 2)
