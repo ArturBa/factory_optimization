@@ -6,12 +6,12 @@ import bisect
 import math
 
 # CONSTANTS - WARTOSCI DO UZGODNIENIA
-material_cost = 1
-big_spec = {'prep_time': 1, 'runtime': 2, 'product_value': 40, 'mat_required': 4, 'base_salary': 5}
-small_spec = {'prep_time': 1, 'runtime': 2, 'product_value': 40, 'mat_required': 4, 'base_salary': 5}
-requirements = {'req_big': 20, 'req_small': 14, 'big_punish': 2, 'small_punish': 2}
+material_cost = 4
+big_spec = {'prep_time': 1.75, 'runtime': 1.5, 'product_value': 70, 'mat_required': 6, 'base_salary': 19}
+small_spec = {'prep_time': 1.25, 'runtime': 1.25, 'product_value': 50, 'mat_required': 4, 'base_salary': 17 }
+requirements = {'req_big': 50, 'req_small': 50, 'big_punish':45, 'small_punish': 30}
 iterations = 100
-population_size = 300
+population_size = 100
 clone_rate = 0.4
 selection_rate = 0.2
 
@@ -36,7 +36,7 @@ def calculate_avrg(population):
     value_sum = 0
     for cell in population:
         value_sum += cell['value']
-    return value_sum / len(population)
+    return round(value_sum / len(population),2)
 
 
 def create_cell(specs):
@@ -271,8 +271,9 @@ if __name__ == '__main__':
               f'Worst value: {worst_value}\tAverage value: {avrg_value}')
     pprint.pprint(sorted(population, key=lambda population_value: population_value['value'], reverse=True)[0])
     plt.plot(range(iterations), best, 'ro', range(iterations), worst, 'bo', range(iterations), avrg, 'go')
+    plt.yscale('symlog')
     plt.xlabel('Iteracja')
     plt.ylabel('Wartość funkcji celu')
     plt.title('Wykres wartości funkcji celu od iteracji podczas uczenia')
-    plt.legend(['Watość maksymalna', 'Wartość minimalna', 'Wartość średnia'])
+    plt.legend(['Wartość maksymalna', 'Wartość minimalna', 'Wartość średnia'])
     plt.show()
