@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import bisect
 import math
 from config import requirements, iterations, population_size, clone_rate, selection_rate, max_big_machines, \
-    max_small_machines, max_bonus, max_haste, min_working_time, max_working_time
+    max_small_machines, max_bonus, max_haste, min_working_time, max_working_time, watchdog
 
 # CONSTANTS - WARTOSCI DO UZGODNIENIA
 material_cost = 4
@@ -274,8 +274,15 @@ if __name__ == '__main__':
         avrg.append(avrg_value)
         print(f'Iteration: {i + 1}\tBest value: {best_value}\t'
               f'Worst value: {worst_value}\tAverage value: {avrg_value}')
+
+        # Check progress using watchdog
+        if i > watchdog:
+            if best[-1] == best[-watchdog]:
+                print(f'Max value {best[-1]}. No progress since {watchdog} iterations')
+                break
+
     pprint.pprint(sorted(population, key=lambda population_value: population_value['value'], reverse=True)[0])
-    plt.plot(range(iterations), best, 'ro', range(iterations), worst, 'bo', range(iterations), avrg, 'go')
+    plt.plot(range(len(best)), best, 'ro', range(len(worst)), worst, 'bo', range(len(avrg)), avrg, 'go')
     plt.yscale('symlog')
     plt.xlabel('Iteracja')
     plt.ylabel('Wartość funkcji celu')
