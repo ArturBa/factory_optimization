@@ -277,7 +277,7 @@ if __name__ == '__main__':
                 break
 
     pprint.pprint(sorted(population, key=lambda population_value: population_value['value'], reverse=True)[0])
-    plt.plot(range(len(best)), best, 'ro', range(len(worst)), worst, 'bo', range(len(avrg)), avrg, 'go')
+    plt.plot(range(len(worst)), worst, 'bo', range(len(avrg)), avrg, 'go', range(len(best)), best, 'ro', alpha=0.60)
     plt.yscale('symlog')
     plt.xlabel('Iteracja')
     plt.ylabel('Wartość funkcji celu')
