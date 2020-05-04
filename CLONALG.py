@@ -88,7 +88,6 @@ def clone(selected, clone_rate):
             factor = (cell['value'] + offset)/val_sum
             clones += [cell for i in range(math.ceil(factor * clone_number))]
             clone_number -= math.ceil(factor * clone_number)
-    print(f'final: {len(clones)}')
     return clones
 
 
