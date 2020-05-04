@@ -4,25 +4,18 @@ import pprint
 import matplotlib.pyplot as plt
 import bisect
 import math
+from config import requirements, iterations, population_size, clone_rate, selection_rate, max_big_machines, \
+    max_small_machines, max_bonus, max_haste, min_working_time, max_working_time, watchdog
 
 # CONSTANTS - WARTOSCI DO UZGODNIENIA
 material_cost = 4
 big_spec = {'prep_time': 1.75, 'runtime': 1.5, 'product_value': 70, 'mat_required': 6, 'base_salary': 19}
-small_spec = {'prep_time': 1.25, 'runtime': 1.25, 'product_value': 50, 'mat_required': 4, 'base_salary': 17 }
-requirements = {'req_big': 50, 'req_small': 50, 'big_punish':45, 'small_punish': 30}
-iterations = 100
-population_size = 100
-clone_rate = 0.4
-selection_rate = 0.2
+small_spec = {'prep_time': 1.25, 'runtime': 1.25, 'product_value': 50, 'mat_required': 4, 'base_salary': 17}
 
 # RANDOMS
 min_material = big_spec['mat_required'] * requirements['req_big'] + \
                small_spec['mat_required'] * requirements['req_small']
 max_material = min_material * 100
-max_machines = 30
-max_working_time = 16
-max_bonus = 0.5
-max_haste = 0.5
 
 
 # PROPONOWANA FORMA ZAPISU POPULACJI
@@ -36,7 +29,7 @@ def calculate_avrg(population):
     value_sum = 0
     for cell in population:
         value_sum += cell['value']
-    return round(value_sum / len(population),2)
+    return round(value_sum / len(population), 2)
 
 
 def create_cell(specs):
@@ -67,9 +60,9 @@ def generate_population(size):
     for i in range(size):
         random = {}
         random.update({'material': rd.randrange(min_material, max_material)})
-        random.update({'big_machines': rd.randrange(1, max_machines)})
-        random.update({'small_machines': rd.randrange(1, max_machines)})
-        random.update({'time': rd.randrange(1, max_working_time + 1)})
+        random.update({'big_machines': rd.randrange(1, max_big_machines)})
+        random.update({'small_machines': rd.randrange(1, max_small_machines)})
+        random.update({'time': rd.randrange(min_working_time, max_working_time + 1)})
         random.update({'bonus': round(rd.uniform(0, max_bonus), 2)})
         random.update({'haste': round(rd.uniform(0, max_haste), 2)})
         cell = create_cell(random)
@@ -86,7 +79,7 @@ def select(population, x):
 def clone_factor(value, value_range):
     if value_range[0] == value_range[1]:
         return 0
-    return (value - value_range[0])/(value_range[1] - value_range[0])
+    return (value - value_range[0]) / (value_range[1] - value_range[0])
 
 
 def clone(selected, clone_rate):
@@ -96,7 +89,7 @@ def clone(selected, clone_rate):
     clones = []
     for cell in selected:
         factor = clone_factor(cell['value'], [min_value, max_value])
-        clone_number = math.ceil(clone_rate * factor * population_size) + math.ceil(0.01 * population_size)
+        clone_number = math.ceil(clone_rate * factor * population_size) + 1
         if clone_number > 0.2 * population_size:
             clone_number = math.ceil(0.2 * population_size)
         clones += [cell for i in range(clone_number)]
@@ -121,13 +114,25 @@ def mature_material(current_value, mutation_factor):
     return current_value + mutation_value
 
 
-def mature_machine_number(current_value, mutation_factor):
+def mature_big_machine_number(current_value, mutation_factor):
     # get change range
-    val_range = math.ceil(max_machines * mutation_factor)
+    val_range = math.ceil(max_big_machines * mutation_factor)
     # get change value
     mutation_value = rd.randrange(-val_range, val_range)
-    if current_value + mutation_value > max_machines:
-        return max_machines
+    if current_value + mutation_value > max_big_machines:
+        return max_big_machines
+    if current_value + mutation_value < 1:
+        return 1
+    return current_value + mutation_value
+
+
+def mature_small_machine_number(current_value, mutation_factor):
+    # get change range
+    val_range = math.ceil(max_small_machines * mutation_factor)
+    # get change value
+    mutation_value = rd.randrange(-val_range, val_range)
+    if current_value + mutation_value > max_small_machines:
+        return max_small_machines
     if current_value + mutation_value < 1:
         return 1
     return current_value + mutation_value
@@ -135,13 +140,13 @@ def mature_machine_number(current_value, mutation_factor):
 
 def mature_time(current_value, mutation_factor):
     # get change range
-    val_range = math.ceil(max_working_time * mutation_factor)
+    val_range = math.ceil((max_working_time - min_working_time) * mutation_factor)
     # get change value
     mutation_value = rd.randrange(-val_range, val_range)
     if current_value + mutation_value > max_working_time:
         return max_working_time
-    if current_value + mutation_value < 1:
-        return 1
+    elif current_value + mutation_value < min_working_time:
+        return min_working_time
     return current_value + mutation_value
 
 
@@ -181,10 +186,10 @@ def hypermutate(clones):
         mutation_factor = get_mutation_factor(max_value, clone['value'])
         mature = {}
         mature.update({'material': mature_material(clone['specifications']['material'], mutation_factor)})
-        mature.update({'big_machines':
-                           mature_machine_number(clone['specifications']['big_machines'], mutation_factor)})
-        mature.update({'small_machines':
-                           mature_machine_number(clone['specifications']['small_machines'], mutation_factor)})
+        mature.update(
+            {'big_machines': mature_big_machine_number(clone['specifications']['big_machines'], mutation_factor)})
+        mature.update(
+            {'small_machines': mature_small_machine_number(clone['specifications']['small_machines'], mutation_factor)})
         mature.update({'time': mature_time(clone['specifications']['time'], mutation_factor)})
         mature.update({'bonus': mature_bonus(clone['specifications']['bonus'], mutation_factor)})
         mature.update({'haste': mature_haste(clone['specifications']['haste'], mutation_factor)})
@@ -230,7 +235,7 @@ def replace(population, matured):
         how_many_changes = round(selection_rate * len(population))
 
     already_changed = []
-    while (len(already_changed) < how_many_changes):
+    while len(already_changed) < how_many_changes:
         choosen = -1 if len(already_changed) == 0 else already_changed[0]
         while choosen in already_changed or choosen == -1:
             choosen = choice(sorted(considered_p, key=lambda considered_p: considered_p['value'],
@@ -269,8 +274,15 @@ if __name__ == '__main__':
         avrg.append(avrg_value)
         print(f'Iteration: {i + 1}\tBest value: {best_value}\t'
               f'Worst value: {worst_value}\tAverage value: {avrg_value}')
+
+        # Check progress using watchdog
+        if i > watchdog:
+            if best[-1] == best[-watchdog]:
+                print(f'Max value {best[-1]}. No progress since {watchdog} iterations')
+                break
+
     pprint.pprint(sorted(population, key=lambda population_value: population_value['value'], reverse=True)[0])
-    plt.plot(range(iterations), best, 'ro', range(iterations), worst, 'bo', range(iterations), avrg, 'go')
+    plt.plot(range(len(best)), best, 'ro', range(len(worst)), worst, 'bo', range(len(avrg)), avrg, 'go')
     plt.yscale('symlog')
     plt.xlabel('Iteracja')
     plt.ylabel('Wartość funkcji celu')
