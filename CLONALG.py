@@ -76,23 +76,18 @@ def select(population, x):
     return selected
 
 
-def clone_factor(value, value_range):
-    if value_range[0] == value_range[1]:
-        return 0
-    return (value - value_range[0]) / (value_range[1] - value_range[0])
-
-
 def clone(selected, clone_rate):
     # clone cells, clones count proportional to cell's value
-    max_value = max([sel['value'] for sel in selected])
-    min_value = min([sel['value'] for sel in selected])
+    clone_number = clone_rate * population_size
+    # offset = biggest absolute value
+    offset = max(abs(selected[0]['value']), abs(selected[-1]['value']))+1
+    val_sum = sum([sel['value'] + offset for sel in selected])
     clones = []
-    for cell in selected:
-        factor = clone_factor(cell['value'], [min_value, max_value])
-        clone_number = math.ceil(clone_rate * factor * population_size) + 1
-        if clone_number > 0.2 * population_size:
-            clone_number = math.ceil(0.2 * population_size)
-        clones += [cell for i in range(clone_number)]
+    while clone_number > 0:
+        for cell in selected:
+            factor = (cell['value'] + offset)/val_sum
+            clones += [cell for i in range(math.ceil(factor * clone_number))]
+            clone_number -= math.ceil(factor * clone_number)
     return clones
 
 
