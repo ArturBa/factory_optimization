@@ -282,5 +282,5 @@ if __name__ == '__main__':
     plt.xlabel('Iteracja')
     plt.ylabel('Wartość funkcji celu')
     plt.title('Wykres wartości funkcji celu od iteracji podczas uczenia')
-    plt.legend(['Wartość maksymalna', 'Wartość minimalna', 'Wartość średnia'])
+    plt.legend(['Wartość minimalna', 'Wartość średnia', 'Wartość maksymalna'])
     plt.show()
