@@ -11,6 +11,7 @@
 \usepackage{longtable}
 \usepackage{multirow}
 \usepackage{pdflscape}
+\usepackage[ruled,vlined]{algorithm2e}
 \usepackage[backend=bibtex]{biblatex}
 \graphicspath{{../img/}}
 
@@ -157,6 +158,37 @@ Artykuł dotyczy zastosowania algorytmu selekcji klonalnej w celu określenia op
 \includegraphics[width=.7\textwidth]{UML_Model.png}
 \caption{Diagram UML}
 \end{figure}
+
+\section{Algorytm}
+Do optymalizacji fabryki zdecydowano się na wybór algorytmu immunologicznego z wykorzystaniem selekcji klonalnej.
+
+Algorytm ten wykorzystuje populację przeciwciał, które są odpowiednikami punktów w wielowymiarowej przestrzeni rozwiązań.
+Najpierw w sposób losowy tworzona jest populacja przeciwciał które zostają zoptymalizowane.
+Proces optymalizacji polega na poszukiwaniu przeciwciał maksymalizujących (lub minimalizujących) funkcję celu.
+Z populacji wybierane są najlepsze przeciwciała które następnie są klonowane.
+Spośród wybranych przeciwciała o najlepszym dopasowaniu (wyniku) są klonowane wielokrotnie, natomiast ilość klonów przeciwciał o niższym dopasowaniu jest niższa.
+Następnie klony są poddawane mutacjom których wielkość jest odwrotnie proporcjonalna do ich jakości. Klony o największym dopasowaniu mutowane są delikatnie, natomiast klony o mniejszym dopasowaniu podlegają większym mutacjom. Następnie każde oryginalne przeciwciało jest z pewnym prawdopodobieństwem zastępowane klonem (o ile ten jest lepszej jakości). Proces jest powtarzany do momentu w którym w kolejnych populacjach nie będą dostrzegalne zmiany lub osiągnięta zostanie odpowiednia liczba iteracji.
+Pseudokod algorytmu został przedstawiony w algorytmie~\ref{alg:clolang}.
+
+\subsection{Pseudokod}
+\begin{algorithm}[H]
+\label{alg:clolang}
+\SetAlgoLined
+\caption{Pseudokod algorytmu immunologicznego z wykorzystaniem selekcji klonalnej}
+\KwData{population\_size, selection\_rate, clone\_rate}
+\KwResult{bestSolution}
+\Begin{
+    population $ \longleftarrow $ generate\_population(population\_size)\;
+    \While{stop criteria is not met}{
+        selected $ \longleftarrow $ select(population, math.ceil(selection\_rate * population\_size))\;
+        clones $ \longleftarrow $ clone(selected, clone\_rate)\;
+        matured $ \longleftarrow $ hypermutate(clones)\;
+        population $ \longleftarrow $ replace(population, matured)\;
+    }
+
+    bestSolution $ \longleftarrow $\ selectBest(population)\;
+}
+\end{algorithm}
 
 \section{Testy}
 
@@ -378,6 +410,14 @@ Z testów wynika że współczynnik klonowania wpływa na jakość rozwiązań d
 Na podstawie testów można określić wpływ parametru watchdog na niewielki. Ma on wpływ na wynik algorytmu jedynie dla jego niewielkich wartości gdy algorytm w kilku krokach nie zdąży poprawić rozwiązań a watchdog jest na tyle mały że zakończy algorytm przed dojściem do maksimum wartości. Przy wielu testach nie udało się zaobserwować sytuacji w której najlepsze rozwiązanie nie zmieniałoby się przez ponad 40 iteracji a następnie uległo znacznej poprawie. Wydaje się więc że ustalenie wartości tego parametru na więcej niż 40, przy obecnym algorytmie, mija się z celem i jedynie wydłuża działanie algorytmu. 
 \subsubsection{Wpływ zmian współczynnika wybranych komórek}
 Zmiana parametru wydaje się nie mieć większego wpływu na jakość najlepszego rozwiązania.  Na podstawie analizy działania algorytmu można dojść do podobnych wniosków. Jako iż algorytm zastępuje rozwiązania tylko lepszymi rozwiązaniami, wybór dodatkowych gorszych rozwiązań do stworzenia klonów które i tak z dużym prawdopodobieństwem zostaną pominięte wydaje się być nieuzasadniony.
+
+\section{Podsumowanie}
+
+Algorytm immunologiczny selekcji klonalnej został wykorzystany w celu maksymalizacji funkcji celu utworzonego modelu fabryki. Przeprowadzone testy pokazują że w zależności od różnych ustawień parametrów, algorytm dąży do znalezienia najlepszego rezultatu. Uzyskane wartości funkcji celu są zadowalające. Należy mieć na uwadze, że ze względu na swój sposób działania, algorytm nie zawsze uzyska globalne optimum w każdym przypadku.
+
+Dla ustalonych niedużych wartości parametrów liczby iteracji i rozmiaru populacji algorytm jest stosunkowo wydajny obliczeniowo, jednak niekiedy przekłada się to na gorszą jakość uzyskanych wyników. Z kolei dla większych wartości tych parametrów można wyraźnie odczuć, że zapotrzebowanie obliczeniowe jest większe, jednakże skutkuje to uzyskaniem lepszych rezultatów.
+
+Reasumując, algorytm immunologiczny wykorzystujący zasadę selekcji klonalnej okazał się zdolny do zoptymalizowania postawionego problemu, niemniej jednak z powodzeniem może być stosowany do rozwiązywania różnych, innych problemów optymalizacyjnych.
 
 
 \newpage
